@@ -69,9 +69,9 @@ a = {}
 for i,v in relations1.items():
 	for j,k in newer_sort_list.items():
 		if i in j and i not in a and v != []:
-			a[i] = v
+			a[i] = [t.replace(" '","'") for t in v]
 		if j in i and i not in a and v != []:
-			a[i] = v
+			a[i] = [t.replace(" '","'") for t in v]
 			
 #merging third components belonging to same relation if there are substrings
 for i,v in a.items():

@@ -32,7 +32,7 @@ for i,v in relations.items():
 
 
 relations1 = {}
-#merging third components belonging to same relation if there are substrings
+#removing verbs from third components 
 for i,v in f.items():
 	i = i.decode('utf-8').replace(" '", "'")
 	l = []
@@ -47,7 +47,7 @@ for i,v in f.items():
 			if t.strip() != '' and t.strip() not in l:
 				l.append(t.strip())
 	v = l[:]	
-	v = [j.encode('utf-8') for j in v]  #was decode earlier
+	v = [j.encode('utf-8') for j in v]  
 	relations1[i] = v
 
 
@@ -64,8 +64,7 @@ print "------------------------------------------------------------------"
 print "Relations"
 print "------------------------------------------------------------------"
 
-
-
+#common to RAKE and OpenIE
 a = {}
 for i,v in relations1.items():
 	for j,k in newer_sort_list.items():
@@ -73,13 +72,19 @@ for i,v in relations1.items():
 			a[i] = v
 		if j in i and i not in a and v != []:
 			a[i] = v
-
+			
+#merging third components belonging to same relation if there are substrings
 for i,v in a.items():
 	p = v[:]
 	for q in range(len(v)):
+		t = v[q].split()
 		for r in range(len(v)):
 			if q != r:
-				if v[q] in v[r]:
+				count = 0
+				for z in t:
+					if z in v[r]:
+						count += 1
+				if count == len(t):
 					if v[q] in p:
 						p.remove(v[q])
 	a[i] = p

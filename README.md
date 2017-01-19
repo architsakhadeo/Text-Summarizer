@@ -10,5 +10,5 @@ Running the code
   
   3) python proc.py -f sorter.txt -> gives relation between objects and subject(common to keyphrases)
   
-  
+  4) Check for the out.png image for graphical representation provided by Open IE
   

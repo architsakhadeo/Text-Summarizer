@@ -233,5 +233,6 @@ new_sort_list = word_score(candidateKeywords)
 
 
 for i,v in new_sort_list:
-	print i.strip(), v
+	i = i.strip()
+	print i, v
 	

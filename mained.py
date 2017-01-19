@@ -128,7 +128,7 @@ if verbose:
 global entities_relations
 entities_relations = stanford_ie(filename, verbose, generate_graphviz)
 global relations
-relations = {}	
+	
 
 
 pronouns = ['WP', 'PRP', '$WP', '$PRP']
@@ -171,19 +171,18 @@ for i in range(len(entities_relations)):
 				#print (entities_relations[i][0], entities_relations[j][0])
 				break
 
-
+'''
 for i in entities_relations:	
 	if i[0] in relations:	
 		relations[i[0]].append(i[2])
 	else:
 		relations[i[0]] = [i[2]] 
 
-
 #Open IE output
 for i, v in relations.items():
 	v = [j.decode('utf-8') for j in v]
 	i = [i.decode('utf-8')]
+'''
 
-
-
-
+relations = entities_relations[:]
+print (relations)

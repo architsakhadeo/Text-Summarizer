@@ -130,59 +130,6 @@ entities_relations = stanford_ie(filename, verbose, generate_graphviz)
 global relations
 	
 
-
-pronouns = ['WP', 'PRP', '$WP', '$PRP']
-proper_nouns = ['NNP','NN']
-
-#female = ['girl']
-#female_pronoun = ['she','her']
-
-
-#Requires mapping for both gender pronouns to replace pronouns with apt proper nouns
-'''
-for i in range(len(entities_relations)):
-	a = nltk.pos_tag(nltk.word_tokenize(entities_relations[i][0]))	
-	print (entities_relations[i][0],a[0][1])
-	if a[0][1] in pronouns and entities_relations[i][0] not in female_pronoun:
-		for j in range(i-1,-1,-1):
-			print (nltk.pos_tag(nltk.word_tokenize(entities_relations[j][0]))[0][1], entities_relations[j][0])
-			if nltk.pos_tag(nltk.word_tokenize(entities_relations[j][0]))[0][1] in proper_nouns:
-				if entities_relations[i][0] not in female_pronoun:
-					entities_relations[i][0] = entities_relations[j][0]
-				print (entities_relations[i][0], entities_relations[j][0])
-				break
-	if a[0][1] in pronouns and entities_relations[i][0] in female_pronoun:   
-		for j in range(i-1,-1,-1):
-			for k in female:
-				if k in entities_relations[j][0]:
-					entities_relations[i][0] = entities_relations[j][0]
-					break
-					print (entities_relations[i][0], entities_relations[j][0])
-'''
-#Replaces pronoun with previous propernoun
-for i in range(len(entities_relations)):
-	a = nltk.pos_tag(nltk.word_tokenize(entities_relations[i][0]))	
-	#print (entities_relations[i][0],a[0][1])
-	if a[0][1] in pronouns:
-		for j in range(i-1,-1,-1):
-			#print (nltk.pos_tag(nltk.word_tokenize(entities_relations[j][0]))[0][1], entities_relations[j][0])
-			if nltk.pos_tag(nltk.word_tokenize(entities_relations[j][0]))[0][1] in proper_nouns:
-				entities_relations[i][0] = entities_relations[j][0]
-				#print (entities_relations[i][0], entities_relations[j][0])
-				break
-
-'''
-for i in entities_relations:	
-	if i[0] in relations:	
-		relations[i[0]].append(i[2])
-	else:
-		relations[i[0]] = [i[2]] 
-
-#Open IE output
-for i, v in relations.items():
-	v = [j.decode('utf-8') for j in v]
-	i = [i.decode('utf-8')]
-'''
-
 relations = entities_relations[:]
-print (relations)
+for i in relations:
+	print (i)

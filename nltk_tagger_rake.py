@@ -5,7 +5,7 @@ import operator
 import nltk
 
 #File containing text
-content1 = open('schindler.txt','r').read()
+content1 = open('income.txt','r').read()
 contentforsplit = content1[:]
 print "\n\n\n\n\n\n"
 sorter = open('sorter.txt','w')
@@ -69,9 +69,14 @@ def preprocess(content1):
 	phraseStr = phraseStr.replace(' < dot > ', '<dot>')
 
 	phraseStr = phraseStr.replace(' ,', ',')	
-	phraseStr1 = phraseStr.replace('<dot>', '.') #for Open IE
-	phraseStr1 = phraseStr1.replace(' ,', ',')	
+
+	phraseStr1 = phraseStr.replace(' ,', ',')	
 	phraseStr1 = phraseStr1.replace('^',"'")
+	global content_no_dot
+	content_no_dot = phraseStr1[:]
+	content_no_dot = content_no_dot.encode('utf8')
+	print "\n\n\n\n\nContent no dot is \n\n\n\n", content_no_dot,"\n\n\n\n\n" 
+	phraseStr1 = phraseStr1.replace('<dot>', '.') #for Open IE
 	sent = nltk.sent_tokenize(content.decode('utf-8'))
 	
 	
@@ -134,6 +139,8 @@ def processPhrases(contentList):
 
 #calculating word score
 def word_score(candidateKeywords):
+	global word_frequency
+	global word_degree
 	word_frequency = {}
 	word_degree = {}
 	for i in candidateKeywords:
@@ -189,7 +196,7 @@ def word_score(candidateKeywords):
 	
 	#separating on the basis of paragraphs
 	splitcontent = contentforsplit.split('\n')
-	freq = [[] for i in range(len(splitcontent))]
+	freq = [[] for i in range(len(splitcontent))]     #contains keyphrases in one para
 	
 	for i,v in new_sort_list:
 		
@@ -200,7 +207,7 @@ def word_score(candidateKeywords):
 	another_freq = []
 	another_score = []
 	for i in range(len(freq)):
-		for j in range(3):                          #for 3 keyphrases in each paragraph
+		for j in range(4):                          #for 3 keyphrases in each paragraph
 			if j < len(freq[i]):
 				another_freq.append(freq[i][j])
 				another_score.append(new_sort_dict[freq[i][j]])
@@ -222,7 +229,7 @@ sym = ['—','[',']']
 for o in sym:
 	content1 = content1.replace(o,' ')
 
-sym1 = ['. The ', '. A ', '. An']
+sym1 = ['. The ', '. A ', '. An ']
 for o in sym1:
 	content1 = content1.replace(o,'. ')
 

@@ -16,11 +16,11 @@ for i in stoplistlines:
 
 #Function to find the total overlap between two strings
 def intersection(string1,string2):
-	list1 = filter(None, re.split('''[-' ]''',string1))
-	list2 = filter(None, re.split('''[-' ]''',string2))
+	list1 = filter(None, re.split('''[-' ]''',string1)) #List1 = String1 split into words
+	list2 = filter(None, re.split('''[-' ]''',string2)) #List2 = String2 split into words
 	count = 0
-	count1 = 0
-	count2 = 0
+	count_min = 0
+	count_max = 0
 	if len(list1) <= len(list2):
 		min_list = list1
 		max_list = list2
@@ -33,11 +33,11 @@ def intersection(string1,string2):
 		max_list[i] = max_list[i].lower()
 	for w in range(len(min_list)):
 		if min_list[w] in max_list:
-			count1 += 1
+			count_min += 1
 	for r in range(len(max_list)):
 		if max_list[r] in min_list:
-			count2 += 1
-	count = max(count1,count2)
+			count_max += 1
+	count = max(count_min,count_max)
 	return count
 
 
@@ -53,7 +53,13 @@ def remove_verbs_merge(component):
 	return string_component
 
 #Combines multiple similar components with one different output index component
-def combine_components(input_list,output_list,index1,index2,output_index):                   #index1
+'''
+input_list -> OpenIE output before processing
+output_list -> OpenIE output after processing
+index1, index2 -> indices which have similar words
+output_index -> remaining component 
+'''
+def combine_components(input_list,output_list,index1,index2,output_index):                   
 	for i in range(len(input_list)):
 		part = []
 		for j in range(len(input_list)):
@@ -269,11 +275,15 @@ sent_dict = dict(zip(index_sent,scored_sent))
 sent_sorted = sorted(sent_dict.items(),key=operator.itemgetter(1),reverse=True)
 
 #Selects top 1/3rd sentences
-sent_sorted_20 = dict(sent_sorted[:len(content_no_dot)/3])
+#sent_sorted_20 = dict(sent_sorted[:len(content_no_dot)/3])
+if len(content_no_dot)/4 >= 20:	
+	sent_sorted_20 = dict(sent_sorted[:20])
+else:
+	sent_sorted_20 = dict(sent_sorted[:int(len(content_no_dot)/3.5)])
 #Sorts these top 1/3rd obtained sentences in increasing order of their appearance in the input text 
 inorder_sent_sorted_20 = sorted(sent_sorted_20.items(),key=operator.itemgetter(0),reverse=False)
 
 for index,score in inorder_sent_sorted_20:
-	print score, '--->', content_no_dot[index],'\n'
-
+	#print score, '--->', content_no_dot[index],'\n'
+	print content_no_dot[index].strip().replace('<dot>','.') + '.'
 

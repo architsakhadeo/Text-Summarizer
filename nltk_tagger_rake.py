@@ -5,7 +5,7 @@ import operator
 import nltk
 
 #File containing text
-content1 = open('income.txt','r').read()
+content1 = open('social.txt','r').read()
 contentforsplit = content1[:]
 print "\n\n\n\n\n\n"
 sorter = open('sorter.txt','w')

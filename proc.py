@@ -1,3 +1,8 @@
+'''
+[subject,verb,object] -> element
+for component in element 
+'''
+
 from mained import relations
 import nltk
 import operator
@@ -42,6 +47,9 @@ def intersection(string1,string2):
 
 
 #Removes the verbs from the components
+'''
+Noun + verb1 -> Noun
+'''
 def remove_verbs_merge(component):
 	component_tokens = nltk.word_tokenize(component)
 	component_tagged = nltk.pos_tag(component_tokens)
@@ -61,11 +69,16 @@ output_index -> remaining component
 '''
 def combine_components(input_list,output_list,index1,index2,output_index):                   
 	for i in range(len(input_list)):
+		'''
+		'part' list includes the list of third components for which there are similar first and second components
+		Redundant elements within this list are removed.
+		'''
 		part = []
 		for j in range(len(input_list)):
-			if input_list[i][index1] in input_list[j][index1] or input_list[j][index1] in input_list[i][index1]: 
-				if input_list[i][index2] in input_list[j][index2] or input_list[j][index2] in input_list[i][index2]:
-					part.append(input_list[j][output_index])
+			if i!=j:	
+				if input_list[i][index1] in input_list[j][index1] or input_list[j][index1] in input_list[i][index1]: 
+					if input_list[i][index2] in input_list[j][index2] or input_list[j][index2] in input_list[i][index2]:
+						part.append(input_list[j][output_index])
 		part1 = part[:]
 		for k in range(len(part)):
 			z = part[k].split(' ')
@@ -79,6 +92,10 @@ def combine_components(input_list,output_list,index1,index2,output_index):
 						if part[k] in part1:
 							part1.remove(part[k])
 	
+	
+		'''
+		This combines the processed elements to give a list of non redundant elements
+		'''
 		for q in part1:
 			sub = []
 			sub.append(input_list[i][index1])
@@ -131,21 +148,21 @@ for i in range(len(common_relations)):
 	for z in range(len(common_relations)):
 		if i != z: 
 			if intersection(common_relations[i][0].lower(),common_relations[z][0].lower()) >= 1:
-				comp_1_i = common_relations[i][0].split()
-				comp_1_z = common_relations[z][0].split()
+				component_1_i = common_relations[i][0].split() #component_1_i - 1st component in common_relations[i] i.e. element of first loop
+				component_1_z = common_relations[z][0].split() #component_1_z - 1st component in common_relations[j] i.e. element of second loop
 				flag = 0
-				for comp_1_i_word in comp_1_i:
-					for comp_1_z_word in comp_1_z:
-						if comp_1_i_word in comp_1_z_word or comp_1_z_word in comp_1_i_word:
+				for component_1_i_word in component_1_i:
+					for component_1_z_word in component_1_z:
+						if component_1_i_word in component_1_z_word or component_1_z_word in component_1_i_word:
 							
-							if len(comp_1_i_word) >= len(comp_1_z_word):
-								maxima1 = comp_1_i_word
-								minima1 = comp_1_z_word
+							if len(component_1_i_word) >= len(component_1_z_word):
+								maxima1 = component_1_i_word
+								minima1 = component_1_z_word
 								flag = 1
 								break
 							else:
-								maxima1 = comp_1_z_word
-								minima1 = comp_1_i_word
+								maxima1 = component_1_z_word
+								minima1 = component_1_i_word
 								flag = 1
 								break
 					if flag == 1:
@@ -156,53 +173,57 @@ for i in range(len(common_relations)):
 
 
 #Combining third components if there are substrings in components. It checks if 1st and 2nd components are similar, then it merges third components for the same
-list_of_elements = []
-list_of_elements = combine_components(common_relations,list_of_elements,0,1,2)
+
+'''
+common_relations_rc -> rc is redundancy check. After every redundancy removal, new variable assigned.
+'''
+common_relations_rc = []
+common_relations_rc = combine_components(common_relations,common_relations_rc,0,1,2)
 
 
 #requires input in decode form
 #Combining second components if there are substrings in components. It checks if 1st and 3rd components are similar, then it merges third components for the same
-list_of_elements_1 = []
-list_of_elements_1 = combine_components(list_of_elements,list_of_elements_1,0,2,1)
+common_relations_rc_1 = []
+common_relations_rc_1 = combine_components(common_relations_rc,common_relations_rc_1,0,2,1)
 
-for i in list_of_elements_1:
+for i in common_relations_rc_1:
 	i[0] = i[0].encode('utf8')
 	i[1] = i[1].encode('utf8')
 	i[2] = i[2].encode('utf8')
 
 #Excludes element which has redundant components which have 2nd and third component almost similar.
-list_of_elements_2 = []
-flag = [0 for i in range(len(list_of_elements_1))]
-for i in range(len(list_of_elements_1)):
-	for j in range(len(list_of_elements_1)):
-		if intersection(list_of_elements_1[i][1],list_of_elements_1[i][2]) >= 1:
+common_relations_rc_2 = []
+flag = [0 for i in range(len(common_relations_rc_1))]
+for i in range(len(common_relations_rc_1)):
+	for j in range(len(common_relations_rc_1)):
+		if intersection(common_relations_rc_1[i][1],common_relations_rc_1[i][2]) >= 1:
 			flag[i] = 1
 			break	
 	if flag[i] == 0:
-		list_of_elements_2.append(list_of_elements_1[i])
+		common_relations_rc_2.append(common_relations_rc_1[i])
 		
 
 
-#Removes redudant elements for which element1 != element2 but element1[0]+element1[1]+element1[2] == element2[0]+element2[1]+element2[2]
-list_of_elements_3 = list_of_elements_2[:]
-for i in range(len(list_of_elements_2)):
-	two_three = list_of_elements_2[i][1] + ' ' + list_of_elements_2[i][2]
+#Removes redudant elements for which element1[0] == element2[0], element1 != element2 but element1[0]+element1[1]+element1[2] == element2[0]+element2[1]+element2[2]
+common_relations_rc_3 = common_relations_rc_2[:]
+for i in range(len(common_relations_rc_2)):
+	two_three = common_relations_rc_2[i][1] + ' ' + common_relations_rc_2[i][2] #two_three is component two and three appended as a string
 	two_three_split = two_three.split()
-	for j in range(len(list_of_elements_2)):
-		if list_of_elements_2[i] != list_of_elements_2[j] and list_of_elements_2[i][0] == list_of_elements_2[j][0]:
-			string_trial = list_of_elements_2[j][1] + ' ' + list_of_elements_2[j][2]
+	for j in range(len(common_relations_rc_2)):
+		if common_relations_rc_2[i] != common_relations_rc_2[j] and common_relations_rc_2[i][0] == common_relations_rc_2[j][0]:
+			string_trial = common_relations_rc_2[j][1] + ' ' + common_relations_rc_2[j][2]
 			string_trial_split = string_trial.split()
 			counting = 0
 			for k in range(len(two_three_split)):
 				 if two_three_split[k] in string_trial_split:
 				 	counting += 1
 			if counting == len(two_three_split):
-				list_of_elements_3.remove(list_of_elements_2[i])
+				common_relations_rc_3.remove(common_relations_rc_2[i])
 				break
 			
 #Adjacency matrix. To find out the degree of connections for each node	
 list_matrix = []
-for i in list_of_elements_3:
+for i in common_relations_rc_3:
 	if i[0] not in list_matrix:
 		list_matrix.append(i[0])
 	if i[2] not in list_matrix:
@@ -210,7 +231,7 @@ for i in list_of_elements_3:
 		
 matrix = [[0 for i in list_matrix] for j in list_matrix]
 
-for i in list_of_elements_3:
+for i in common_relations_rc_3:
 	matrix[list_matrix.index(i[0])][list_matrix.index(i[2])] = 1 
 
 
@@ -237,14 +258,14 @@ list_of_elements_combo = sorted(combo.items(),key=operator.itemgetter(1),reverse
 keys = [i[0] for i in list_of_elements_combo]
 values = [i[1] for i in list_of_elements_combo]
 
-for i in list_of_elements_3:
+for i in common_relations_rc_3:
 	if i[0] == '' or i[1] == '' or i[2] == '':
-		list_of_elements_3.remove(i)
+		common_relations_rc_3.remove(i)
 	print i
 	
-generate_graphviz_graph(list_of_elements_3,verbose=True)
+generate_graphviz_graph(common_relations_rc_3,verbose=True)
 
-#generate_graphviz_graph(list_of_elements_3,verbose=True)
+#generate_graphviz_graph(common_relations_rc_3,verbose=True)
 
 os.system('mv /tmp/openie/out.png ./')
 

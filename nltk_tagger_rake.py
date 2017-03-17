@@ -5,7 +5,7 @@ import operator
 import nltk
 
 #File containing text
-content1 = open('social.txt','r').read()
+content1 = open('schindler.txt','r').read()
 contentforsplit = content1[:]
 print "\n\n\n\n\n\n"
 sorter = open('sorter.txt','w')
@@ -32,27 +32,27 @@ def preprocess(content1):
 	token = nltk.word_tokenize(content.decode('utf-8'))
 	
 	pos = nltk.pos_tag(token) #pos tagger
-	ii = []
-	vv = []
-	for p,v in pos:
-		ii.append(p)
-		vv.append(v)
+	word_token = []
+	tag_token = []
+	for w,t in pos:
+		word_token.append(w)
+		tag_token.append(t)
 
 	phraseList = []
 	p = 0
-	while p < len(vv):
-		if vv[p] == 'NNP' or vv[p] == 'NNPS':
-			ph = ii[p]
+	while p < len(tag_token):
+		if tag_token[p] == 'NNP' or tag_token[p] == 'NNPS':   #Proper noun tags
+			ph = word_token[p]
 			j = p + 1
-			if j >= len(vv):
+			if j >= len(tag_token):
 				phraseList.append(ph)
 				break
 			flag = 0
-			while j < len(vv):
-				if vv[j] == 'NNP' or vv[j] == 'NNPS':
-					ph += '-' + ii[j]
+			while j < len(tag_token):
+				if tag_token[j] == 'NNP' or tag_token[j] == 'NNPS':
+					ph += '-' + word_token[j]
 					j += 1
-					if j >= len(vv):	
+					if j >= len(tag_token):	
 						flag = 1		
 				else:
 					p = j
@@ -62,8 +62,13 @@ def preprocess(content1):
 				phraseList.append(ph)
 				break
 		else:
-			phraseList.append(ii[p])
+			phraseList.append(word_token[p])
 			p += 1
+	
+	
+	'''
+	phraseList contains merged proper nouns
+	'''
 	
 	phraseStr = ' '.join(phraseList)
 	phraseStr = phraseStr.replace(' < dot > ', '<dot>')
@@ -88,8 +93,8 @@ def preprocess(content1):
 	content = phraseStr[:]
 	
 	
-	sym = [' the ',' a ', ' an ']
-	for i in sym:
+	articles = [' the ',' a ', ' an ']
+	for i in articles:
 		content = content.replace(i,' ')
 	
 	#Removal of verbs which are not in stoplist
@@ -220,22 +225,30 @@ def word_score(candidateKeywords):
 
 
 #dealing with characters which cause in poor results
-sym0 = ['“','”','"']
-for i in sym0:
+articles0 = ['“','”','"']
+for i in articles0:
 	content1 = content1.replace(i,'')
 content1 = content1.replace("'",'^')
 content1 = content1.replace("’",'^')		 	 
-sym = ['—','[',']']
-for o in sym:
+articles = ['—','[',']']
+for o in articles:
 	content1 = content1.replace(o,' ')
 
-sym1 = ['. The ', '. A ', '. An ']
-for o in sym1:
+articles1 = ['. The ', '. A ', '. An ']
+for o in articles1:
 	content1 = content1.replace(o,'. ')
 
+
+#Does preprocessing on the input text
 content = preprocess(content1)
+
+#Splits processed input text on multiple symbols 
 contentList = contentSplit(content)
+
+#Creates a list of keyphrases from the available text 
 candidateKeywords = processPhrases(contentList)
+
+#calculates word scores of each keyphrase
 new_sort_list = word_score(candidateKeywords)
 
 

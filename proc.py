@@ -255,6 +255,9 @@ for i in range(len(matrix)):
 
 combo = dict(zip(list_matrix,count))
 list_of_elements_combo = sorted(combo.items(),key=operator.itemgetter(1),reverse=False) #ascending
+print "\n\n\n\n\n\n\n\n\n\n\n\n^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
+print list_of_elements_combo
+print "\n\n\n\n\n\n\n\n\n\n\n\n^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
 keys = [i[0] for i in list_of_elements_combo]
 values = [i[1] for i in list_of_elements_combo]
 

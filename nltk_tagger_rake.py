@@ -80,7 +80,7 @@ def preprocess(content1):
 	global content_no_dot
 	content_no_dot = phraseStr1[:]
 	content_no_dot = content_no_dot.encode('utf8')
-	print "\n\n\n\n\nContent no dot is \n\n\n\n", content_no_dot,"\n\n\n\n\n" 
+	print "\n\n\n\n\nContent no dcd ot is \n\n\n\n", content_no_dot,"\n\n\n\n\n" 
 	phraseStr1 = phraseStr1.replace('<dot>', '.') #for Open IE
 	sent = nltk.sent_tokenize(content.decode('utf-8'))
 	
@@ -195,9 +195,11 @@ def word_score(candidateKeywords):
 	#print '----------------------------------------------------------------'
 	
 	new_sort_list = sorted(new_sort_list.items(),key=operator.itemgetter(1),reverse=True)
+	
 	new_sort_dict = {}
 	for i,v in new_sort_list:
 		new_sort_dict[i] = v
+	
 	
 	#separating on the basis of paragraphs
 	splitcontent = contentforsplit.split('\n')
@@ -212,7 +214,7 @@ def word_score(candidateKeywords):
 	another_freq = []
 	another_score = []
 	for i in range(len(freq)):
-		for j in range(4):                          #for 3 keyphrases in each paragraph
+		for j in range(5):                          #for 3 keyphrases in each paragraph
 			if j < len(freq[i]):
 				another_freq.append(freq[i][j])
 				another_score.append(new_sort_dict[freq[i][j]])
@@ -222,8 +224,9 @@ def word_score(candidateKeywords):
 	new_sort_dictor = sorted(dictor.items(),key=operator.itemgetter(1),reverse=True)
 					
 	return new_sort_dictor
-
-
+	'''
+	return new_sort_list
+	'''
 #dealing with characters which cause in poor results
 articles0 = ['“','”','"']
 for i in articles0:

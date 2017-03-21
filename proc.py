@@ -19,6 +19,9 @@ stoplist = []
 for i in stoplistlines:
 	stoplist.append(i.strip().lower())
 
+
+for i in relations:
+	print i
 #Function to find the total overlap between two strings
 def intersection(string1,string2):
 	list1 = filter(None, re.split('''[-' ]''',string1)) #List1 = String1 split into words
@@ -51,6 +54,8 @@ def intersection(string1,string2):
 Noun + verb1 -> Noun
 '''
 def remove_verbs_merge(component):
+	verb = ['VB','VBD','VBG','VBN','VBZ','VBP']
+	proper_noun = ['NNP','NNPS']
 	component_tokens = nltk.word_tokenize(component)
 	component_tagged = nltk.pos_tag(component_tokens)
 	string_component = []
@@ -74,11 +79,10 @@ def combine_components(input_list,output_list,index1,index2,output_index):
 		Redundant elements within this list are removed.
 		'''
 		part = []
-		for j in range(len(input_list)):
-			if i!=j:	
-				if input_list[i][index1] in input_list[j][index1] or input_list[j][index1] in input_list[i][index1]: 
-					if input_list[i][index2] in input_list[j][index2] or input_list[j][index2] in input_list[i][index2]:
-						part.append(input_list[j][output_index])
+		for j in range(len(input_list)):	
+			if input_list[i][index1] in input_list[j][index1] or input_list[j][index1] in input_list[i][index1]: 
+				if input_list[i][index2] in input_list[j][index2] or input_list[j][index2] in input_list[i][index2]:
+					part.append(input_list[j][output_index])
 		part1 = part[:]
 		for k in range(len(part)):
 			z = part[k].split(' ')
@@ -125,7 +129,7 @@ for i in range(len(relations)):
 
 verb = ['VB','VBD','VBG','VBN','VBZ','VBP']
 proper_noun = ['NNP','NNPS']
-
+'''
 for i in relations:
 	#removing verbs from first components and merges them if they are same after removal of verbs
 	str_component_one = remove_verbs_merge(i[0])
@@ -133,8 +137,20 @@ for i in relations:
 	#removing verbs from first components and merges them if they are same after removal of verbs
 	str_component_three = remove_verbs_merge(i[2])
 	i[2] = str_component_three.replace(" '","'").decode('utf-8')
-		
+'''
+'''		
+for i in range(len(relations)):
+	for z in range(len(relations)):
+		if i != z: 
+			if relations[i][0].lower() in relations[z][0].lower():
+				if len(relations[z][0]) > len(relations[i][0]):
+					relations[i][0].replace(relations[i][0],relations[z][0]) 
+'''
 
+
+for i in relations:
+	i[0] = i[0].decode('utf-8')
+	i[2] = i[2].decode('utf-8')	
 #Finds overlap between the subjects found from OpenIE and the keywords obtained from keyword extraction phase
 common_relations = []
 for i in relations:
@@ -144,6 +160,7 @@ for i in relations:
 
 
 #Replaces words like Schindler with Oskar-Schindler. Basically reduces redundancy by having just Oskar-Schindler instead of Oskar, Schindler, Oskar-Schindler separately.
+
 for i in range(len(common_relations)):
 	for z in range(len(common_relations)):
 		if i != z: 
@@ -177,6 +194,7 @@ for i in range(len(common_relations)):
 '''
 common_relations_rc -> rc is redundancy check. After every redundancy removal, new variable assigned.
 '''
+
 common_relations_rc = []
 common_relations_rc = combine_components(common_relations,common_relations_rc,0,1,2)
 
@@ -186,10 +204,31 @@ common_relations_rc = combine_components(common_relations,common_relations_rc,0,
 common_relations_rc_1 = []
 common_relations_rc_1 = combine_components(common_relations_rc,common_relations_rc_1,0,2,1)
 
+			
+
+#common_relations_rc_1 = newer[:]
+
 for i in common_relations_rc_1:
 	i[0] = i[0].encode('utf8')
 	i[1] = i[1].encode('utf8')
 	i[2] = i[2].encode('utf8')
+
+
+newer1 = []
+flag = [0 for i in range(len(common_relations_rc_1))]
+for i in range(len(common_relations_rc_1)):
+	for j in range(len(common_relations_rc_1)):
+		if intersection(common_relations_rc_1[i][1],common_relations_rc_1[i][2]) >= 2:
+			flag[i] = 1
+			break	
+		if flag[i] == 0 and i != j:
+			if common_relations_rc_1[i][0] in common_relations_rc_1[j][0] or common_relations_rc_1[j][0] in common_relations_rc_1[i][0]:
+				if common_relations_rc_1[i][2] in common_relations_rc_1[j][2] or common_relations_rc_1[j][2] in common_relations_rc_1[i][2]:
+					flag[j] = 1
+	if flag[i] == 0:
+		newer1.append(common_relations_rc_1[i])
+	
+common_relations_rc_1 = newer1[:]
 
 #Excludes element which has redundant components which have 2nd and third component almost similar.
 common_relations_rc_2 = []

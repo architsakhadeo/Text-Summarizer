@@ -14,44 +14,26 @@ extraction process using RAKE extraction method.
 import re
 import operator
 import nltk
-import sys
 
 
 
 
 #File containing text
-content1 = open('chapter4.txt','r').read()
+content1 = open('sorter_part2.txt','r').read()
 contentforsplit = content1[:]
-sorter = open('sorter.txt','w')
+sorter = open('sorter_3.txt','w')
 
 stoplistlines = open("stopwords1.txt",'r').readlines()
 stoplist = []
 for i in stoplistlines:
 	stoplist.append(i.strip().lower())
-		
-
-		
-		
-#dealing with characters which cause in poor results
-articles0 = ['“','”','"']
-for i in articles0:
-	content1 = content1.replace(i,'')
-content1 = content1.replace("'",'^')
-content1 = content1.replace("’",'^')		 	 
-articles = ['—','[',']']
-for o in articles:
-	content1 = content1.replace(o,' ')
-
-articles1 = ['. The ', '. A ', '. An ']
-for o in articles1:
-	content1 = content1.replace(o,'. ')
 
 
 
-	
+
 #refining data to appropriate form
 def preprocess(content1):
-	
+
 	'''
 	Numbers like 1.34 are edge cases and the extractor will split the number
 	into 1 and 34 if not handled properly. Hence it has been replaced by <dot>
@@ -70,7 +52,6 @@ def preprocess(content1):
 	content = filter(None, re.sub('''-and-''','''&''',content))
 	
 	
-	
 	'''
 	Joining continuously occurring proper nouns into one proper noun separated
 	by '-' to avoid unnecessary higher score to proper nouns.
@@ -81,7 +62,7 @@ def preprocess(content1):
 	as one word and not as two separate words thus retaining the importance to
 	both the proper nouns equally if they occur one after the other
 	
-	'''	
+	'''		
 	token = nltk.word_tokenize(content.decode('utf-8'))
 	
 	pos = nltk.pos_tag(token) #pos tagger
@@ -90,6 +71,7 @@ def preprocess(content1):
 	for w,t in pos:
 		word_token.append(w)
 		tag_token.append(t)
+
 	phraseList = []
 	p = 0
 	while p < len(tag_token):
@@ -116,30 +98,31 @@ def preprocess(content1):
 		else:
 			phraseList.append(word_token[p])
 			p += 1
+
+
 	
 	
 	'''
 	phraseList contains merged proper nouns
-	'''
-	
-	phraseStr = ' '.join(phraseList) #Thus phraseStr contains the (input content)string obtained after merging the proper nouns.
+	'''	
+	phraseStr = ' '.join(phraseList)
 	phraseStr = phraseStr.replace(' < dot > ', '<dot>')
-	phraseStr = phraseStr.replace(' ,', ',')	 # replaces ',' looking similar character by comma
-	phraseStr1 = phraseStr.replace(' ,', ',')	 # replaces ',' looking similar character by comma 
-	phraseStr1 = phraseStr1.replace('^',"'")     
-	
-	#Made global since it is imported in proc.py
+	phraseStr = phraseStr.replace(' ,', ',')	
+	phraseStr1 = phraseStr.replace(' ,', ',')	
+	phraseStr1 = phraseStr1.replace('^',"'")
+	#Made global since it is imported in proc_part2.py
 	global content_no_dot
 	content_no_dot = phraseStr1[:]
-	content_no_dot = content_no_dot.encode('utf8')
+	content_no_dot = content_no_dot.encode('utf8').replace('-< dot >','<dot>')
+
 	phraseStr1 = phraseStr1.replace('<dot>', '.') #for Open IE
 	sent = nltk.sent_tokenize(content.decode('utf-8'))
 	content11 = phraseStr1[:]
-	sorter.write(content11.encode('utf8'))
+	sorter.write(content11.encode('utf8').replace('-< dot > ','<dot>'))
 	content = phraseStr[:]
-	
-	
-	
+
+
+
 	
 	#Removal of articles
 	articles = [' the ',' a ', ' an ']
@@ -160,6 +143,7 @@ def preprocess(content1):
 	'''
 	verb = ['VB','VBD','VBG','VBN','VBZ','VBP']
 	verbs = []
+
 	for t in sent:	
 		token = nltk.word_tokenize(t)
 		pos = nltk.pos_tag(token)
@@ -167,8 +151,10 @@ def preprocess(content1):
 			if v in verb:
 				if i not in stoplist:
 					verbs.append(i)
+
 	for i in verbs:
 		content = filter(None, re.sub(' ' +str(i.encode('utf8') + ' '),''' | ''',content))
+	
 	return content
 
 
@@ -188,11 +174,11 @@ def contentSplit(content):
 
 	Resultant will be "Indian aeroplane", "best of its kind", "thus", "world ranking 3 in terms of safety"
 
-	'''	
+	'''
 	contentList = filter(None, re.split('''[`~!@#$%&*_?=+/,.\\\\;|{}\(\)]''',content))
 	return contentList
-	
-	
+
+
 
 	
 #Finding candidate keywords
@@ -206,17 +192,19 @@ def processPhrases(contentList):
 	will become
 
 	"Indian aeroplane", "best", "kind", "thus", "world ranking 3", "terms", "safety"
-
 	'''	
-
-
-	candidateKeywords = []	
+	candidateKeywords = []
+	
 	for i in contentList:
 		phraseStr = (i.replace('\t','').replace('\n','').strip())
-		phraseList = phraseStr.split()				
+
+		phraseList = phraseStr.split()
+		
+		
 		for k in phraseList:	
 			if k.lower() in stoplist:
 				phraseList[phraseList.index(k)] = '|'
+
 		phraseStr = ' '.join(phraseList)
 		a = phraseStr.split('|')
 		for o in a:
@@ -230,6 +218,7 @@ def processPhrases(contentList):
 
 #calculating word score
 def word_score(candidateKeywords):
+
 	'''
 	Calculates the frequency of the words in the document.
 	Frequency of the word is the number of times it appears in the document.
@@ -271,7 +260,9 @@ def word_score(candidateKeywords):
 			phrased += " "
 			phrased += j
 			sumof += (word_degree[j.lower()])/(word_frequency[j.lower()] * 1.0)   #phrase wise score
+
 		summed[phrased.strip()] = sumof
+
 	sort_list = sorted(summed.items(),key=operator.itemgetter(1),reverse=True)
 	
 	content = filter(None, re.sub('''Rs.''','''Rs''',content1))
@@ -288,6 +279,7 @@ def word_score(candidateKeywords):
 	for i in range(len(con)):
 		con[i] = con[i].replace('\t','').replace('\n','').strip()
 	length = [0 for i in range(len(con))]
+	dash = []
 	
 	##printing keyphrases in decreasing order of word scores
 	#print "NLTK POS TAGGER"
@@ -299,35 +291,58 @@ def word_score(candidateKeywords):
 	
 	new_sort_list = sorted(new_sort_list.items(),key=operator.itemgetter(1),reverse=True)
 	
-	
-	
-	
-	#To find out 5 keywords per paragraph
-	'''
 	new_sort_dict = {}
 	for i,v in new_sort_list:
 		new_sort_dict[i] = v
+
+
+	
+	
 	#separating on the basis of paragraphs
 	splitcontent = contentforsplit.split('\n')
 	freq = [[] for i in range(len(splitcontent))]     #contains keyphrases in one para
-	for i,v in new_sort_list:		
+	
+	for i,v in new_sort_list:
+		
 		for j in splitcontent:
 			if i in j.decode('utf-8'):
 				freq[splitcontent.index(j)].append(i)
-	##print freq
+
 	another_freq = []
 	another_score = []
 	for i in range(len(freq)):
-		for j in range(5):                          #for 3 keyphrases in each paragraph
+		for j in range(25):                          #for 25 keyphrases in each paragraph
 			if j < len(freq[i]):
 				another_freq.append(freq[i][j])
 				another_score.append(new_sort_dict[freq[i][j]])
-	dictor = dict(zip(another_freq,another_score))	
-	new_sort_dictor = sorted(dictor.items(),key=operator.itemgetter(1),reverse=True)					
+	dictor = dict(zip(another_freq,another_score))
+
+	
+	new_sort_dictor = sorted(dictor.items(),key=operator.itemgetter(1),reverse=True)
+					
 	return new_sort_dictor
 	'''
 	return new_sort_list
+	'''
+
+
+
 	
+#dealing with characters which cause in poor results
+articles0 = ['“','”','"']
+for i in articles0:
+	content1 = content1.replace(i,'')
+content1 = content1.replace("'",'^')
+content1 = content1.replace("’",'^')		 	 
+articles = ['—','[',']']
+for o in articles:
+	content1 = content1.replace(o,' ')
+
+articles1 = ['. The ', '. A ', '. An ']
+for o in articles1:
+	content1 = content1.replace(o,'. ')
+
+
 
 
 
@@ -336,28 +351,26 @@ def main():
 	content = preprocess(content1)
 
 
-
+	
 	#Splits processed input text on multiple symbols 
 	contentList = contentSplit(content)
 
 
-
+	
 	#Creates a list of keyphrases from the available text 
 	candidateKeywords = processPhrases(contentList)
 
 
-
+	
 	#calculates word scores of each keyphrase
 	new_sort_list = word_score(candidateKeywords)
 
 
-
-	#Prints the list of keyphrases in decreasing order
+	#Print keyphrases in descending order
 	for i,v in new_sort_list:
 		i = i.strip()
 		print i, v
-	
-	
-	
-	
+
+
+
 main()	

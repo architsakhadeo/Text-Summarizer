@@ -131,5 +131,5 @@ global relations
 	
 
 relations = entities_relations[:]
-for i in relations:
-	print (i)
+#for i in relations:
+	#print (i)

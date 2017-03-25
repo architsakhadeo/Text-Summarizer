@@ -2,16 +2,16 @@
 [subject,verb,object] -> element
 for component in element 
 '''
-from copy import deepcopy
+
 from mained import relations
 import nltk
 import operator
-from nltk_tagger_rake import new_sort_list, content_no_dot
+from nltk_tagger_rake_part2 import new_sort_list, content_no_dot
 from mained import generate_graphviz_graph
 import os
 import sys
 import re
-from nltk_tagger_rake import word_frequency, word_degree
+from nltk_tagger_rake_part2 import word_frequency, word_degree
 
 #Stopwords list
 stoplistlines = open("stopwords1.txt",'r').readlines()
@@ -20,12 +20,8 @@ for i in stoplistlines:
 	stoplist.append(i.strip().lower())
 
 
-complete_text = content_no_dot[:]
-complete_text_list = complete_text.split('.')
-
-
-relations_pronouns = deepcopy(relations)
-	
+##for i in relations:
+	#print i
 #Function to find the total overlap between two strings
 def intersection(string1,string2):
 	list1 = filter(None, re.split('''[-' ]''',string1)) #List1 = String1 split into words
@@ -43,29 +39,12 @@ def intersection(string1,string2):
 		min_list[i] = min_list[i].lower()
 	for i in range(len(max_list)):
 		max_list[i] = max_list[i].lower()
-	'''
-	for w in range(len(min_list)):
-		for y in range(len(max_list)):	
-			if min_list[w] in max_list[y]:
-				#print min_list[w],max_list[y]
-				count_min += 1
-	
-	for r in range(len(max_list)):
-		for e in range(len(min_list)):
-			if max_list[r] in min_list[e]:
-				#print min_list[e],max_list[r]			
-				count_max += 1
-	'''
 	for w in range(len(min_list)):
 		if min_list[w] in max_list:
-			#print min_list[w],max_list
 			count_min += 1
-	
 	for r in range(len(max_list)):
 		if max_list[r] in min_list:
-			#print min_list,max_list[r]			
 			count_max += 1
-
 	count = max(count_min,count_max)
 	return count
 
@@ -135,13 +114,9 @@ def combine_components(input_list,output_list,index1,index2,output_index):
 	return output_list
 
 
-
-
 #Replaces pronouns by previously encountered Proper Nouns
-
 pronouns = ['WP', 'PRP', '$WP', '$PRP']
 proper_nouns = ['NNP','NN']
-
 for i in range(len(relations)):
 	component_tagged = nltk.pos_tag(nltk.word_tokenize(relations[i][0]))	
 	if component_tagged[0][1] in pronouns: #**************don't predict the pronoun and proper noun to be in 0th index in both. find the index of the pronoun and propernoun. Put this above before merging first components -> Osker-Schindler and Schindler friendship. Check for the proper noun above. Move this above later. 
@@ -175,7 +150,7 @@ for i in range(len(relations)):
 
 for i in relations:
 	i[0] = i[0].decode('utf-8')
-	i[1] = i[1].decode('utf-8')	
+	i[1] = i[1].decode('utf-8')
 	i[2] = i[2].decode('utf-8')	
 #Finds overlap between the subjects found from OpenIE and the keywords obtained from keyword extraction phase
 common_relations = []
@@ -183,7 +158,6 @@ for i in relations:
 	for j,k in new_sort_list:
 		if intersection(i[0].encode('utf8'),j.encode('utf8')) >= 1 and i not in common_relations:
 			common_relations.append(i)
-
 
 
 #Replaces words like Schindler with Oskar-Schindler. Basically reduces redundancy by having just Oskar-Schindler instead of Oskar, Schindler, Oskar-Schindler separately.
@@ -211,9 +185,9 @@ for i in range(len(common_relations)):
 								break
 					if flag == 1:
 						break
-		
-				if maxima1 not in common_relations[i][0]:
-					common_relations[i][0] = common_relations[i][0].replace(minima1,maxima1)
+				if flag == 1:
+					if maxima1 not in common_relations[i][0]:
+						common_relations[i][0] = common_relations[i][0].replace(minima1,maxima1)
 
 
 #Combining third components if there are substrings in components. It checks if 1st and 2nd components are similar, then it merges third components for the same
@@ -326,81 +300,6 @@ list_of_elements_combo = sorted(combo.items(),key=operator.itemgetter(1),reverse
 #print "\n\n\n\n\n\n\n\n\n\n\n\n^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
 keys = [i[0] for i in list_of_elements_combo]
 values = [i[1] for i in list_of_elements_combo]
-#print list_of_elements_combo[-3:]
-imp_nodes = keys[-3:]
-#print imp_nodes
-flagged_sentences = [0 for i in range(len(relations_pronouns))]
-reduced_text_list = []
-#relations_pronouns and common_relations_rc_3
-"""
-#print '\n\n\n\n'
-for i in common_relations_rc_3:
-	#print i
-#print '\n\n\n\n	'
-for i in common_relations_rc_3:
-	tagflag = 0
-	for j in imp_nodes:
-		if intersection(j,i[0]) >= 1 or intersection(j,i[1]) >= 1 or intersection(j,i[2]) >= 1:
-			for k in relations_pronouns:
-				if flagged_sentences[relations_pronouns.index(k)] == 0:	
-					if k[1] in i[1] or i[1] in k[1]:
-						if k[2] in i[2] or i[2] in k[2]:	
-							flagged_sentences[relations_pronouns.index(k)] = 1
-							tagflag = 1
-							break
-						else:
-							#print "Stage 3, " + str(k[2]),str(i[2])
-					
-					#else:
-						##print "Stage 2, " + str(k[1]),str(i[1])
-			if tagflag == 1:
-				break
-		else:
-			#print "Stage 1, " + str(i),str(j)
-		if tagflag == 1:
-			break
-for i in relations_pronouns:
-	#print i, flagged_sentences[relations_pronouns.index(i)]
-"""
-
-##for i in common_relations_rc_3:
-	#print i
-#Normal sentences + sentences from flagged
-#print imp_nodes
-flagged_all = [0 for i in range(len(complete_text_list))]
-for i in complete_text_list:
-	count = 0
-	for j in imp_nodes:
-		if intersection(j,i):
-			count += 1
-	if count != 0:
-		flagged_all[complete_text_list.index(i)] = 1
-'''
-k = 0
-for i in complete_text_list:
-	if flagged_all[complete_text_list.index(i)] == 1:
-		continue
-	for j in range(k,len(flagged_sentences)):
-		if flagged_sentences[j] == 1:
-			if relations_pronouns[j][0] in i and relations_pronouns[j][1] in i and relations_pronouns[j][2] in i:
-				 flagged_all[complete_text_list.index(i)] = 1
-				 k = j
-				 break
-'''
-
-reduced_text = ''
-for i in range(len(flagged_all)):
-	if flagged_all[i] == 1:
-		reduced_text += complete_text_list[i].strip() + '. '
-
-#print reduced_text 
-new_text = open('sorter_part2.txt','w+')
-#without paragraphs. All sentences lie in one para here
-new_text.write(reduced_text.replace('<dot>','.'))
-
-"""
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
 
 for i in common_relations_rc_3:
 	if i[0] == '' or i[1] == '' or i[2] == '':
@@ -426,7 +325,7 @@ for i in range(len(content_no_dot)):
 				scored_sent[i] += values[k]
 				#print '------------',content_no_dot[i], keys[k], intersection(content_no_dot[i],keys[k]), values[k]
 
-for i in range(len(content_no_dot)):	
+##for i in range(len(content_no_dot)):	
 	#print content_no_dot[i], scored_sent[i], '\n'
 
 for i in content_no_dot:
@@ -441,21 +340,100 @@ sent_sorted = sorted(sent_dict.items(),key=operator.itemgetter(1),reverse=True)
 
 #Selects top 1/3rd sentences
 #sent_sorted_20 = dict(sent_sorted[:len(content_no_dot)/3])
-if len(content_no_dot)/4 >= 20:	
+if len(content_no_dot)/3.5 >= 20:	
 	sent_sorted_20 = dict(sent_sorted[:20])
 else:
 	sent_sorted_20 = dict(sent_sorted[:int(len(content_no_dot)/3.5)])
 #Sorts these top 1/3rd obtained sentences in increasing order of their appearance in the input text 
 inorder_sent_sorted_20 = sorted(sent_sorted_20.items(),key=operator.itemgetter(0),reverse=False)
 
+
+print '\n\n\n\n\n\n'
 for index,score in inorder_sent_sorted_20:
 	##print score, '--->', content_no_dot[index],'\n'
-	#print content_no_dot[index].strip().replace('<dot>','.') + '.'
-
-
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-"""
+	print content_no_dot[index].strip().replace('<dot> ','.') + '.'
 
 
 
-#use deepcopy for permanent copying
+
+
+for i in common_relations_rc_3:
+	for j in range(len(i)):
+		i[j] = i[j].decode('utf-8')
+		
+
+
+
+import networkx as nx
+import matplotlib.pyplot as plt
+
+
+
+def draw_graph(graph, labels=None, graph_layout='shell',
+               node_size=1600, node_color='blue', node_alpha=0.3,
+               node_text_size=12,
+               edge_color='blue', edge_alpha=0.3, edge_tickness=1,
+               edge_text_pos=0.3,
+               text_font='sans-serif'):
+
+    # create networkx graph
+    G=nx.Graph()
+
+    # add edges
+    for edge in graph:
+        G.add_edge(edge[0], edge[1])
+
+    # these are different layouts for the network you may try
+    # shell seems to work best
+    if graph_layout == 'spring':
+        graph_pos=nx.spring_layout(G)
+    elif graph_layout == 'spectral':
+        graph_pos=nx.spectral_layout(G)
+    elif graph_layout == 'random':
+        graph_pos=nx.random_layout(G)
+    else:
+        graph_pos=nx.shell_layout(G)
+
+    # draw graph
+    nx.draw_networkx_nodes(G,graph_pos,node_size=node_size, 
+                           alpha=node_alpha, node_color=node_color)
+    nx.draw_networkx_edges(G,graph_pos,width=edge_tickness,
+                           alpha=edge_alpha,edge_color=edge_color)
+    nx.draw_networkx_labels(G, graph_pos,font_size=node_text_size,
+                            font_family=text_font)
+
+    if labels is None:
+        labels = range(len(graph))
+
+    edge_labels = dict(zip(graph, labels))
+    nx.draw_networkx_edge_labels(G, graph_pos, edge_labels=edge_labels, 
+                                 label_pos=edge_text_pos)
+
+    # show graph
+    plt.show()
+
+#graph = [(0, 1), (1, 5), (1, 7), (4, 5), (4, 8), (1, 6), (3, 7), (5, 9),
+#         (2, 4), (0, 4), (2, 5), (3, 6), (8, 9)]
+
+graph = []
+
+for i in common_relations_rc_3:
+	graph.append((i[0],i[2]))
+
+
+labels = []
+for i in common_relations_rc_3:
+	labels.append(i[1])
+
+# you may name your edge labels
+#labels = map(chr, range(65, 65+len(graph)))
+draw_graph(graph, labels)
+
+# if edge labels is not specified, numeric labels (0, 1, 2...) will be used
+#draw_graph(graph)
+
+
+
+
+
+

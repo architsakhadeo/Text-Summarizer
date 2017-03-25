@@ -20,7 +20,7 @@ import sys
 
 
 #File containing text
-content1 = open('chapter4.txt','r').read()
+content1 = open('schindler.txt','r').read()
 contentforsplit = content1[:]
 sorter = open('sorter.txt','w')
 
@@ -290,7 +290,7 @@ def word_score(candidateKeywords):
 	length = [0 for i in range(len(con))]
 	
 	##printing keyphrases in decreasing order of word scores
-	#print "NLTK POS TAGGER"
+	print "NLTK POS TAGGER"
 	new_sort_list = {}
 	for i,v in sort_list:
 		new_sort_list[i.replace('^',"'").replace('<dot>','.').strip()] = v
@@ -348,6 +348,7 @@ def main():
 
 
 	#calculates word scores of each keyphrase
+	global new_sort_list
 	new_sort_list = word_score(candidateKeywords)
 
 
@@ -356,7 +357,7 @@ def main():
 	for i,v in new_sort_list:
 		i = i.strip()
 		print i, v
-	
+	print '\n\n\n\n\n\n\n\n\n\n\n\n'
 	
 	
 	

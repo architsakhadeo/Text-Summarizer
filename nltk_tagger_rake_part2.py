@@ -282,7 +282,7 @@ def word_score(candidateKeywords):
 	dash = []
 	
 	##printing keyphrases in decreasing order of word scores
-	#print "NLTK POS TAGGER"
+	print "NLTK POS TAGGER"
 	new_sort_list = {}
 	for i,v in sort_list:
 		new_sort_list[i.replace('^',"'").replace('<dot>','.').strip()] = v
@@ -363,6 +363,7 @@ def main():
 
 	
 	#calculates word scores of each keyphrase
+	global new_sort_list
 	new_sort_list = word_score(candidateKeywords)
 
 
@@ -371,6 +372,6 @@ def main():
 		i = i.strip()
 		print i, v
 
-
+	print '\n\n\n\n\n\n\n\n\n\n\n\n'
 
 main()	

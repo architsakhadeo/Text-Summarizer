@@ -20,7 +20,7 @@ import sys
 
 
 #File containing text
-content1 = open('schindler.txt','r').read()
+content1 = open('important.txt','r').read()
 contentforsplit = content1[:]
 sorter = open('sorter.txt','w')
 

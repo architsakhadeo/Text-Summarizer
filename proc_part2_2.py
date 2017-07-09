@@ -447,12 +447,31 @@ sent_sorted = sorted(sent_dict.items(),key=operator.itemgetter(1),reverse=True)
 
 #Selects top 1/3rd sentences
 #sent_sorted_20 = dict(sent_sorted[:len(content_no_dot)/3])
+import re
+words = []
+for i in content_no_dot:
+	no_words = len(re.findall(r'\s\w+',i)) + 1
+	words.append(no_words)
+
+total_words = sum(words)
+third_total = sum(words)/3
+
+summation_words = 0 
+index_words = 0
+for i in range(len(content_no_dot)):
+	summation_words += words[i]
+	if summation_words >= third_total:
+		index_words = i
+		break
+
+'''
 if len(content_no_dot)/3.5 >= 20:	
 	sent_sorted_top = dict(sent_sorted[:20])
 else:
 	sent_sorted_top = dict(sent_sorted[:int(len(content_no_dot)/3.5)])
-	
-	
+'''	
+
+sent_sorted_top = dict(sent_sorted[:index_words])	
 
 #Sorts these top 1/3rd obtained sentences in increasing order of their appearance in the input text 
 inorder_sent_sorted_top = sorted(sent_sorted_top.items(),key=operator.itemgetter(0),reverse=False)

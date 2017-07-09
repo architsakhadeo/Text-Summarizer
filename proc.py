@@ -211,11 +211,11 @@ for i in relations:
 #Replaces words like Schindler with Oskar-Schindler. Basically reduces redundancy by having just Oskar-Schindler instead of Oskar, Schindler, Oskar-Schindler separately.
 for i in range(len(common_relations)):
 	for z in range(len(common_relations)):
+		flag = 0
 		if i != z: 
 			if intersection(common_relations[i][0].lower(),common_relations[z][0].lower()) >= 1:
 				component_1_i = common_relations[i][0].split() #component_1_i - 1st component in common_relations[i] i.e. element of first loop
 				component_1_z = common_relations[z][0].split() #component_1_z - 1st component in common_relations[j] i.e. element of second loop
-				flag = 0
 				for component_1_i_word in component_1_i:
 					for component_1_z_word in component_1_z:
 						if component_1_i_word in component_1_z_word or component_1_z_word in component_1_i_word:
@@ -233,8 +233,9 @@ for i in range(len(common_relations)):
 					if flag == 1:
 						break
 		
-				if maxima1 not in common_relations[i][0]:
-					common_relations[i][0] = common_relations[i][0].replace(minima1,maxima1)
+				if flag == 1:
+					if maxima1 not in common_relations[i][0]:
+						common_relations[i][0] = common_relations[i][0].replace(minima1,maxima1)
 
 
 

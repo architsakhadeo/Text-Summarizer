@@ -311,7 +311,7 @@ def word_score(candidateKeywords):
 	another_freq = []
 	another_score = []
 	for i in range(len(freq)):
-		for j in range(25):                          #for 25 keyphrases in each paragraph
+		for j in range(50):                          #for 25 keyphrases in each paragraph
 			if j < len(freq[i]):
 				another_freq.append(freq[i][j])
 				another_score.append(new_sort_dict[freq[i][j]])

@@ -12,7 +12,7 @@ Running the code
   
   4) python nltk_tagger_rake_part2.py 
   
-  5) python proc_part2.py -f sorter_3.txt
+  5) python proc_part2_2.py -f sorter_3.txt
   
   6) Check for the out.png image for graphical representation provided by Open IE
   
@@ -20,4 +20,4 @@ or Just run script.sh
 
   1) Change the variable "content1" to input file name in the nltk_tagger_rake.py
 
-  2) bash script.sh
+  2) bash script1.sh

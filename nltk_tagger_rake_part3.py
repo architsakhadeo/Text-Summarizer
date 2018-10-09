@@ -19,8 +19,8 @@ import nltk
 
 
 #File containing text
-#content1 = open('sorter_part2.txt','r').read() # for winnowing
-content1 = open('input.txt','r').read() #for nowinnowing
+#content1 = open('sorter_part2.txt','r').read()
+content1 = open('important.txt','r').read()
 contentforsplit = content1[:]
 sorter = open('sorter_3.txt','w')
 
@@ -112,14 +112,14 @@ def preprocess(content1):
 	phraseStr1 = phraseStr.replace(' ,', ',')	
 	phraseStr1 = phraseStr1.replace('^',"'")
 	#Made global since it is imported in proc_part2.py
-	global content_no_dot
-	content_no_dot = phraseStr1[:]
-	content_no_dot = content_no_dot.encode('utf8').replace('-< dot >-','<dot>').replace('-< dot >','<dot>').replace('< dot >-','<dot>').replace(' <dot> ','<dot>')
-	print content_no_dot
+	global read
+	read = phraseStr1[:]
+	read = read.encode('utf8').replace('-< dot >','<dot>')
+
 	phraseStr1 = phraseStr1.replace('<dot>', '.') #for Open IE
 	sent = nltk.sent_tokenize(content.decode('utf-8'))
 	content11 = phraseStr1[:]
-	sorter.write(content11.encode('utf8'))
+	sorter.write(content11.encode('utf8').replace('-< dot > ','<dot>'))
 	content = phraseStr[:]
 
 
@@ -374,5 +374,148 @@ def main():
 		print i, v
 
 	print '\n\n\n\n\n\n\n\n\n\n\n\n'
+main()
 
-main()	
+
+import math
+
+print '\n\n\n\n\n\n\HEY\n\n\n\n'
+scores = []
+sorter.close()
+read = open('sorter_3.txt','r').read().split(' . ')
+print read
+for i in read:
+	score = 0
+	words = i.split(' ')
+	for j in words:
+		if j in word_frequency:	
+			score += (word_degree[j.lower()]*1.0)/word_frequency[j.lower()]
+			print score, j
+	scores.append(score)
+print scores
+indexed = [i for i in range(len(scores))]
+sent_dict = dict(zip(indexed,scores))
+sent_sorted = sorted(sent_dict.items(),key=operator.itemgetter(1),reverse=True)
+
+
+
+
+sent_sorted_top_10 = dict(sent_sorted[:int(math.ceil(len(read)*0.1))])	
+#Sorts these top 1/3rd obtained sentences in increasing order of their appearance in the input text 
+inorder_sent_sorted_top_10 = sorted(sent_sorted_top_10.items(),key=operator.itemgetter(0),reverse=False)
+
+
+print '\n\n\n\n\n\nSummary is\n\n\n'
+strstrstr_10 = ""
+for index,score in inorder_sent_sorted_top_10:
+	strstrstr_10 += str(read[index].strip().replace('<dot>','.')) + '.\n'
+	print read[index].strip().replace('<dot>','.') + '.'
+
+filer_10 = open('summary_10.txt','w')
+filer_10.write(strstrstr_10)
+
+
+
+
+
+
+sent_sorted_top_25 = dict(sent_sorted[:int(math.ceil(len(read)*0.25))])	
+#Sorts these top 1/3rd obtained sentences in increasing order of their appearance in the input text 
+inorder_sent_sorted_top_25 = sorted(sent_sorted_top_25.items(),key=operator.itemgetter(0),reverse=False)
+
+
+print '\n\n\n\n\n\nSummary is\n\n\n'
+strstrstr_25 = ""
+for index,score in inorder_sent_sorted_top_25:
+	strstrstr_25 += str(read[index].strip().replace('<dot>','.')) + '.\n'
+	print read[index].strip().replace('<dot>','.') + '.'
+
+filer_25 = open('summary_25.txt','w')
+filer_25.write(strstrstr_25)
+
+
+
+
+
+
+
+
+
+sent_sorted_top_33 = dict(sent_sorted[:int(math.ceil(len(read)*0.33))])	
+#Sorts these top 1/3rd obtained sentences in increasing order of their appearance in the input text 
+inorder_sent_sorted_top_33 = sorted(sent_sorted_top_33.items(),key=operator.itemgetter(0),reverse=False)
+
+
+print '\n\n\n\n\n\nSummary is\n\n\n'
+strstrstr_33 = ""
+for index,score in inorder_sent_sorted_top_33:
+	strstrstr_33 += str(read[index].strip().replace('<dot>','.')) + '.\n'
+	print read[index].strip().replace('<dot>','.') + '.'
+
+filer_33 = open('summary_33.txt','w')
+filer_33.write(strstrstr_33)
+
+
+
+sent_sorted_top_39 = dict(sent_sorted[:int(math.ceil(len(read)*0.39))])	
+#Sorts these top 1/3rd obtained sentences in increasing order of their appearance in the input text 
+inorder_sent_sorted_top_39 = sorted(sent_sorted_top_39.items(),key=operator.itemgetter(0),reverse=False)
+
+
+print '\n\n\n\n\n\nSummary is\n\n\n'
+strstrstr_39 = ""
+for index,score in inorder_sent_sorted_top_39:
+	strstrstr_39 += str(read[index].strip().replace('<dot>','.')) + '.\n'
+	print read[index].strip().replace('<dot>','.') + '.'
+
+filer_39 = open('summary_39.txt','w')
+filer_39.write(strstrstr_39)
+
+
+
+sent_sorted_top_45 = dict(sent_sorted[:int(math.ceil(len(read)*0.45))])	
+#Sorts these top 1/3rd obtained sentences in increasing order of their appearance in the input text 
+inorder_sent_sorted_top_45 = sorted(sent_sorted_top_45.items(),key=operator.itemgetter(0),reverse=False)
+
+
+print '\n\n\n\n\n\nSummary is\n\n\n'
+strstrstr_45 = ""
+for index,score in inorder_sent_sorted_top_45:
+	strstrstr_45 += str(read[index].strip().replace('<dot>','.')) + '.\n'
+	print read[index].strip().replace('<dot>','.') + '.'
+
+filer_45 = open('summary_45.txt','w')
+filer_45.write(strstrstr_45)
+
+
+sent_sorted_top_15 = dict(sent_sorted[:int(math.ceil(len(read)*0.15))])	
+#Sorts these top 1/3rd obtained sentences in increasing order of their appearance in the input text 
+inorder_sent_sorted_top_15 = sorted(sent_sorted_top_15.items(),key=operator.itemgetter(0),reverse=False)
+
+
+print '\n\n\n\n\n\nSummary is\n\n\n'
+strstrstr_15 = ""
+for index,score in inorder_sent_sorted_top_15:
+	strstrstr_15 += str(read[index].strip().replace('<dot>','.')) + '.\n'
+	print read[index].strip().replace('<dot>','.') + '.'
+
+filer_15 = open('summary_15.txt','w')
+filer_15.write(strstrstr_15)
+
+
+sent_sorted_top_20 = dict(sent_sorted[:int(math.ceil(len(read)*0.20))])	
+#Sorts these top 1/3rd obtained sentences in increasing order of their appearance in the input text 
+inorder_sent_sorted_top_20 = sorted(sent_sorted_top_20.items(),key=operator.itemgetter(0),reverse=False)
+
+
+print '\n\n\n\n\n\nSummary is\n\n\n'
+strstrstr_20 = ""
+for index,score in inorder_sent_sorted_top_20:
+	strstrstr_20 += str(read[index].strip().replace('<dot>','.')) + '.\n'
+	print read[index].strip().replace('<dot>','.') + '.'
+
+filer_20 = open('summary_20.txt','w')
+filer_20.write(strstrstr_20)
+
+
+

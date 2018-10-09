@@ -134,8 +134,8 @@ def preprocess(content1):
 	content_no_dot = content_no_dot.encode('utf8')
 	phraseStr1 = phraseStr1.replace('<dot>', '.') #for Open IE
 	sent = nltk.sent_tokenize(content.decode('utf-8'))
-	content11 = phraseStr1[:]
-	sorter.write(content11.encode('utf8'))
+	content11 = phraseStr1[:].encode('utf8')
+	sorter.write(content11)
 	content = phraseStr[:]
 	
 	
@@ -273,7 +273,7 @@ def word_score(candidateKeywords):
 			sumof += (word_degree[j.lower()])/(word_frequency[j.lower()] * 1.0)   #phrase wise score
 		summed[phrased.strip()] = sumof
 	sort_list = sorted(summed.items(),key=operator.itemgetter(1),reverse=True)
-	
+	print sort_list
 	content = filter(None, re.sub('''Rs.''','''Rs''',content1))
 	content = filter(None, re.sub('''Mr.''','''Mr''',content))
 	content = filter(None, re.sub('''Mrs.''','''Mrs''',content))
@@ -296,10 +296,9 @@ def word_score(candidateKeywords):
 		new_sort_list[i.replace('^',"'").replace('<dot>','.').strip()] = v
 	#	#print i.replace('^',"'").replace('<dot>','.').strip(), ' - ', v
 	##print '----------------------------------------------------------------'
-	
+
+	#new_sort_list = sorted(new_sort_list.items(),key=operator.itemgetter(1),reverse=True)[:len(new_sort_list)/3]
 	new_sort_list = sorted(new_sort_list.items(),key=operator.itemgetter(1),reverse=True)
-	
-	
 	
 	
 	#To find out 5 keywords per paragraph
@@ -344,7 +343,7 @@ def main():
 
 	#Creates a list of keyphrases from the available text 
 	candidateKeywords = processPhrases(contentList)
-
+	print candidateKeywords
 
 
 	#calculates word scores of each keyphrase

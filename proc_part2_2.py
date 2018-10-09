@@ -1,3 +1,4 @@
+import math
 '''
 [subject,verb,object] -> element
 for component in element 
@@ -6,7 +7,7 @@ for component in element
 from mained import relations
 import nltk
 import operator
-from nltk_tagger_rake_part2 import new_sort_list, content_no_dot
+from nltk_tagger_rake_part2 import new_sort_list, content_no_dot, word_frequency, word_degree
 from mained import generate_graphviz_graph
 import os
 import sys
@@ -253,7 +254,7 @@ Oskar-Schindler, saved multiple, Jews
 Oskar-Schindler, saved, Jews
 Oskar-Schindler, helped, Jews
 
-It selects only one of them
+It selects only one of them as it is assumed that they'd belong to the same sentence
 '''
 
 
@@ -403,18 +404,23 @@ such that
 SUBJECT -------------------------> OBJECT
 
 
-'''	
-generate_graphviz_graph(common_relations_rc_3,verbose=True)
+'''
+	
 
+'''
 #generate_graphviz_graph(common_relations_rc_3,verbose=True)
 
-os.system('mv /tmp/openie/out.png ./')
 
+generate_graphviz_graph(common_relations_rc_3,verbose=True)
+os.system('mv /tmp/openie/out.png ./')
+'''
 
 '''
-Content written in sorter.txt. Imported from nltk_tagger_rake.py. Selects top 1/3rd statements which occur first in order of appearance. Scores for each sentence are calculated on the basis of presence of top nodes. Sum of these degrees of nodes is equivalent to score of sentence
+Content written in sorter_3.txt. Imported from nltk_tagger_rake.py. Selects top 1/3rd statements which occur first in order of appearance. Scores for each sentence are calculated on the basis of presence of top nodes. Sum of these degrees of nodes is equivalent to score of sentence
 '''
 content_no_dot = content_no_dot.split('.')
+for i in content_no_dot:
+	content_no_dot[content_no_dot.index(i)] = content_no_dot[content_no_dot.index(i)].replace('<dot>','.')
 scored_sent = [0 for i in range(len(content_no_dot))]
 
 
@@ -423,11 +429,45 @@ scored_sent = [0 for i in range(len(content_no_dot))]
 '''
 Score of a sentence = Sum(Number of connections for each node present in it)
 '''
+'''
 for i in range(len(content_no_dot)):
+	content_no_dot_space = content_no_dot[i].split(' ')	
+	for j in range(len(content_no_dot_space)):
+		if content_no_dot_space[j].lower() not in stoplist:	
+			for k in range(len(keys)):
+				if intersection(content_no_dot_space[j],keys[k]) >= 1:
+					keyphrase = 1
+					if content_no_dot_space[j] in word_frequency:
+						keyphrase = (word_degree[content_no_dot_space[j].lower()]*1.0)/word_frequency[content_no_dot_space[j].lower()]
+					scored_sent[i] += (values[k] * keyphrase)
+					break
+					
+'''
+'''
+for i in range(len(content_no_dot)):
+	content_no_dot_space = content_no_dot[i].split(' ')	
+	for j in range(len(content_no_dot_space)):
+		if content_no_dot_space[j].lower() not in stoplist:	
+			for k in range(len(keys)):
+				if intersection(content_no_dot_space[j].lower(),keys[k].lower()) >= 1:
+					scored_sent[i] += values[k]
+					break
+
+'''
+
+for i in range(len(content_no_dot)):
+	print content_no_dot[i]
 	if content_no_dot[i].lower() not in stoplist:	
 		for k in range(len(keys)):
 			if intersection(content_no_dot[i],keys[k]) >= 1:
 				scored_sent[i] += values[k]
+
+
+
+
+
+
+
 
 
 for i in content_no_dot:
@@ -446,24 +486,26 @@ sent_sorted = sorted(sent_dict.items(),key=operator.itemgetter(1),reverse=True)
 
 
 #Selects top 1/3rd sentences
-#sent_sorted_20 = dict(sent_sorted[:len(content_no_dot)/3])
+#sent_sorted_20 = dict(sent_sorted[:len(content_no_dot1)/3])
 import re
 words = []
-for i in content_no_dot:
+content_no_dot1 = content_no_dot[:]
+'''
+for i in content_no_dot1:
 	no_words = len(re.findall(r'\s\w+',i)) + 1
 	words.append(no_words)
 
 total_words = sum(words)
-third_total = sum(words)/3
+third_total = sum(words) * 0.1
 
 summation_words = 0 
 index_words = 0
-for i in range(len(content_no_dot)):
+for i in range(len(content_no_dot1)):
 	summation_words += words[i]
 	if summation_words >= third_total:
 		index_words = i
 		break
-
+'''
 '''
 if len(content_no_dot)/3.5 >= 20:	
 	sent_sorted_top = dict(sent_sorted[:20])
@@ -471,20 +513,136 @@ else:
 	sent_sorted_top = dict(sent_sorted[:int(len(content_no_dot)/3.5)])
 '''	
 
-sent_sorted_top = dict(sent_sorted[:index_words])	
 
+
+
+
+
+
+
+
+
+
+
+#sent_sorted_top = dict(sent_sorted[:index_words])	
+sent_sorted_top_10 = dict(sent_sorted[:int(math.ceil(len(content_no_dot1)*0.1))])	
 #Sorts these top 1/3rd obtained sentences in increasing order of their appearance in the input text 
-inorder_sent_sorted_top = sorted(sent_sorted_top.items(),key=operator.itemgetter(0),reverse=False)
+inorder_sent_sorted_top_10 = sorted(sent_sorted_top_10.items(),key=operator.itemgetter(0),reverse=False)
 
 
 print '\n\n\n\n\n\nSummary is\n\n\n'
-strstrstr = ""
-for index,score in inorder_sent_sorted_top:
-	strstrstr += str(content_no_dot[index].strip().replace('<dot> ','.')) + '.\n'
-	print content_no_dot[index].strip().replace('<dot> ','.') + '.'
+strstrstr_10 = ""
+for index,score in inorder_sent_sorted_top_10:
+	strstrstr_10 += str(content_no_dot[index].strip().replace('<dot>','.')) + '.\n'
+	print content_no_dot[index].strip().replace('<dot>','.') + '.'
 
-filer = open('summary.txt','w')
-filer.write(strstrstr)
+filer_10 = open('summary_10.txt','w')
+filer_10.write(strstrstr_10)
+
+
+
+
+
+
+sent_sorted_top_25 = dict(sent_sorted[:int(math.ceil(len(content_no_dot1)*0.25))])	
+#Sorts these top 1/3rd obtained sentences in increasing order of their appearance in the input text 
+inorder_sent_sorted_top_25 = sorted(sent_sorted_top_25.items(),key=operator.itemgetter(0),reverse=False)
+
+
+print '\n\n\n\n\n\nSummary is\n\n\n'
+strstrstr_25 = ""
+for index,score in inorder_sent_sorted_top_25:
+	strstrstr_25 += str(content_no_dot[index].strip().replace('<dot>','.')) + '.\n'
+	print content_no_dot[index].strip().replace('<dot>','.') + '.'
+
+filer_25 = open('summary_25.txt','w')
+filer_25.write(strstrstr_25)
+
+
+
+
+
+
+
+
+
+sent_sorted_top_33 = dict(sent_sorted[:int(math.ceil(len(content_no_dot1)*0.33))])	
+#Sorts these top 1/3rd obtained sentences in increasing order of their appearance in the input text 
+inorder_sent_sorted_top_33 = sorted(sent_sorted_top_33.items(),key=operator.itemgetter(0),reverse=False)
+
+
+print '\n\n\n\n\n\nSummary is\n\n\n'
+strstrstr_33 = ""
+for index,score in inorder_sent_sorted_top_33:
+	strstrstr_33 += str(content_no_dot[index].strip().replace('<dot>','.')) + '.\n'
+	print content_no_dot[index].strip().replace('<dot>','.') + '.'
+
+filer_33 = open('summary_33.txt','w')
+filer_33.write(strstrstr_33)
+
+
+
+sent_sorted_top_39 = dict(sent_sorted[:int(math.ceil(len(content_no_dot1)*0.39))])	
+#Sorts these top 1/3rd obtained sentences in increasing order of their appearance in the input text 
+inorder_sent_sorted_top_39 = sorted(sent_sorted_top_39.items(),key=operator.itemgetter(0),reverse=False)
+
+
+print '\n\n\n\n\n\nSummary is\n\n\n'
+strstrstr_39 = ""
+for index,score in inorder_sent_sorted_top_39:
+	strstrstr_39 += str(content_no_dot[index].strip().replace('<dot>','.')) + '.\n'
+	print content_no_dot[index].strip().replace('<dot>','.') + '.'
+
+filer_39 = open('summary_39.txt','w')
+filer_39.write(strstrstr_39)
+
+
+
+sent_sorted_top_45 = dict(sent_sorted[:int(math.ceil(len(content_no_dot1)*0.45))])	
+#Sorts these top 1/3rd obtained sentences in increasing order of their appearance in the input text 
+inorder_sent_sorted_top_45 = sorted(sent_sorted_top_45.items(),key=operator.itemgetter(0),reverse=False)
+
+
+print '\n\n\n\n\n\nSummary is\n\n\n'
+strstrstr_45 = ""
+for index,score in inorder_sent_sorted_top_45:
+	strstrstr_45 += str(content_no_dot[index].strip().replace('<dot>','.')) + '.\n'
+	print content_no_dot[index].strip().replace('<dot>','.') + '.'
+
+filer_45 = open('summary_45.txt','w')
+filer_45.write(strstrstr_45)
+
+
+sent_sorted_top_15 = dict(sent_sorted[:int(math.ceil(len(content_no_dot1)*0.15))])	
+#Sorts these top 1/3rd obtained sentences in increasing order of their appearance in the input text 
+inorder_sent_sorted_top_15 = sorted(sent_sorted_top_15.items(),key=operator.itemgetter(0),reverse=False)
+
+
+print '\n\n\n\n\n\nSummary is\n\n\n'
+strstrstr_15 = ""
+for index,score in inorder_sent_sorted_top_15:
+	strstrstr_15 += str(content_no_dot[index].strip().replace('<dot>','.')) + '.\n'
+	print content_no_dot[index].strip().replace('<dot>','.') + '.'
+
+filer_15 = open('summary_15.txt','w')
+filer_15.write(strstrstr_15)
+
+
+sent_sorted_top_20 = dict(sent_sorted[:int(math.ceil(len(content_no_dot1)*0.20))])	
+#Sorts these top 1/3rd obtained sentences in increasing order of their appearance in the input text 
+inorder_sent_sorted_top_20 = sorted(sent_sorted_top_20.items(),key=operator.itemgetter(0),reverse=False)
+
+
+print '\n\n\n\n\n\nSummary is\n\n\n'
+strstrstr_20 = ""
+for index,score in inorder_sent_sorted_top_20:
+	strstrstr_20 += str(content_no_dot[index].strip().replace('<dot>','.')) + '.\n'
+	print content_no_dot[index].strip().replace('<dot>','.') + '.'
+
+filer_20 = open('summary_20.txt','w')
+filer_20.write(strstrstr_20)
+
+
 '''
 for i in common_relations_rc_3:
 	for j in range(len(i)):

@@ -2,7 +2,7 @@
 [subject,verb,object] -> element
 for component in element 
 '''
-from copy import deepcopy
+
 from mained import relations
 import nltk
 import operator
@@ -13,32 +13,14 @@ import sys
 import re
 from nltk_tagger_rake import word_frequency, word_degree
 
-
-
-
 #Stopwords list
 stoplistlines = open("stopwords1.txt",'r').readlines()
 stoplist = []
 for i in stoplistlines:
 	stoplist.append(i.strip().lower())
 
-
-complete_text = content_no_dot[:]
-complete_text_list = complete_text.split('.')    #####Think about this for other punctuations
-
-relations_pronouns = deepcopy(relations)
-
-
-
-	
 #Function to find the total overlap between two strings
 def intersection(string1,string2):
-	'''
-	It outputs the total number of words common to both strings
-
-	Oskar's and Oskar-Schindler would output 0 as no word is present in the other one,
-	hence we split on "'" and "-" and spaces and then check for intersections
-	'''
 	list1 = filter(None, re.split('''[-' ]''',string1)) #List1 = String1 split into words
 	list2 = filter(None, re.split('''[-' ]''',string2)) #List2 = String2 split into words
 	count = 0
@@ -54,7 +36,6 @@ def intersection(string1,string2):
 		min_list[i] = min_list[i].lower()
 	for i in range(len(max_list)):
 		max_list[i] = max_list[i].lower()
-
 	for w in range(len(min_list)):
 		if min_list[w] in max_list:
 			count_min += 1
@@ -65,16 +46,11 @@ def intersection(string1,string2):
 	return count
 
 
-
-
 #Removes the verbs from the components
 '''
-Noun + Verb -> Noun
-
+Noun + verb1 -> Noun
 '''
 def remove_verbs_merge(component):
-	verb = ['VB','VBD','VBG','VBN','VBZ','VBP']
-	proper_noun = ['NNP','NNPS']
 	component_tokens = nltk.word_tokenize(component)
 	component_tagged = nltk.pos_tag(component_tokens)
 	string_component = []
@@ -84,18 +60,12 @@ def remove_verbs_merge(component):
 	string_component = ' '.join(string_component)
 	return string_component
 
-
-
-#Compares components at multiple indices to merge them into one thus decreasing the redundancy
+#Combines multiple similar components with one different output index component
 '''
 input_list -> OpenIE output before processing
 output_list -> OpenIE output after processing
 index1, index2 -> indices which have similar words
 output_index -> remaining component 
-
-Here, if components at index1 and index2 are mostly same(very high overlap),
-and if the component at output_index is similar to other components at the same
-position(output_index), then it merges them into one component.
 '''
 def combine_components(input_list,output_list,index1,index2,output_index):                   
 	for i in range(len(input_list)):
@@ -104,12 +74,11 @@ def combine_components(input_list,output_list,index1,index2,output_index):
 		Redundant elements within this list are removed.
 		'''
 		part = []
-		for j in range(len(input_list)):	
-			if input_list[i][index1] in input_list[j][index1] or input_list[j][index1] in input_list[i][index1]: 
-				if input_list[i][index2] in input_list[j][index2] or input_list[j][index2] in input_list[i][index2]:
-					part.append(input_list[j][output_index])
-		
-		
+		for j in range(len(input_list)):
+			if i!=j:	
+				if input_list[i][index1] in input_list[j][index1] or input_list[j][index1] in input_list[i][index1]: 
+					if input_list[i][index2] in input_list[j][index2] or input_list[j][index2] in input_list[i][index2]:
+						part.append(input_list[j][output_index])
 		part1 = part[:]
 		for k in range(len(part)):
 			z = part[k].split(' ')
@@ -141,19 +110,9 @@ def combine_components(input_list,output_list,index1,index2,output_index):
 	return output_list
 
 
-
-
 #Replaces pronouns by previously encountered Proper Nouns
-'''
-
-If pronouns are present in the first components as subjects, it replaces it with
-the immediately obtained proper noun in the next encountered first component
-containing a proper noun. 
-
-'''
 pronouns = ['WP', 'PRP', '$WP', '$PRP']
 proper_nouns = ['NNP','NN']
-
 for i in range(len(relations)):
 	component_tagged = nltk.pos_tag(nltk.word_tokenize(relations[i][0]))	
 	if component_tagged[0][1] in pronouns: #**************don't predict the pronoun and proper noun to be in 0th index in both. find the index of the pronoun and propernoun. Put this above before merging first components -> Osker-Schindler and Schindler friendship. Check for the proper noun above. Move this above later. 
@@ -164,41 +123,19 @@ for i in range(len(relations)):
 
 
 
+verb = ['VB','VBD','VBG','VBN','VBZ','VBP']
+proper_noun = ['NNP','NNPS']
 
-#--------------------------------------------------------------------------------------------
-#Code to remove verbs and merge has been removed but is located on Github
-#in previous commits and is not required.
-#--------------------------------------------------------------------------------------------
-
-
-
-#Since the input to further task is required in decoded utf8 form
 for i in relations:
-	i[0] = i[0].decode('utf-8')
-	i[1] = i[1].decode('utf-8')	
-	i[2] = i[2].decode('utf-8')	
-	
-	
-	
-	
+	#removing verbs from first components and merges them if they are same after removal of verbs
+	str_component_one = remove_verbs_merge(i[0])
+	i[0] = str_component_one.replace(" '","'").decode('utf-8')
+	#removing verbs from first components and merges them if they are same after removal of verbs
+	str_component_three = remove_verbs_merge(i[2])
+	i[2] = str_component_three.replace(" '","'").decode('utf-8')
+		
+
 #Finds overlap between the subjects found from OpenIE and the keywords obtained from keyword extraction phase
-'''
-OpenIE output              Keywords  
-                                      
-a -> b                     a,d  
-a -> c
-c -> d
-d -> e
-f -> g
-
-
-Output is only overlap of first component of OpenIE output and Keywords
-
-a -> b
-a -> c
-d -> e
-
-'''
 common_relations = []
 for i in relations:
 	for j,k in new_sort_list:
@@ -206,17 +143,14 @@ for i in relations:
 			common_relations.append(i)
 
 
-print common_relations
-
-
 #Replaces words like Schindler with Oskar-Schindler. Basically reduces redundancy by having just Oskar-Schindler instead of Oskar, Schindler, Oskar-Schindler separately.
 for i in range(len(common_relations)):
 	for z in range(len(common_relations)):
-		flag = 0
 		if i != z: 
 			if intersection(common_relations[i][0].lower(),common_relations[z][0].lower()) >= 1:
 				component_1_i = common_relations[i][0].split() #component_1_i - 1st component in common_relations[i] i.e. element of first loop
 				component_1_z = common_relations[z][0].split() #component_1_z - 1st component in common_relations[j] i.e. element of second loop
+				flag = 0
 				for component_1_i_word in component_1_i:
 					for component_1_z_word in component_1_z:
 						if component_1_i_word in component_1_z_word or component_1_z_word in component_1_i_word:
@@ -234,13 +168,8 @@ for i in range(len(common_relations)):
 					if flag == 1:
 						break
 		
-				if flag == 1:
-					if maxima1 not in common_relations[i][0]:
-						common_relations[i][0] = common_relations[i][0].replace(minima1,maxima1)
-
-
-
-
+				if maxima1 not in common_relations[i][0]:
+					common_relations[i][0] = common_relations[i][0].replace(minima1,maxima1)
 
 
 #Combining third components if there are substrings in components. It checks if 1st and 2nd components are similar, then it merges third components for the same
@@ -248,7 +177,6 @@ for i in range(len(common_relations)):
 '''
 common_relations_rc -> rc is redundancy check. After every redundancy removal, new variable assigned.
 '''
-
 common_relations_rc = []
 common_relations_rc = combine_components(common_relations,common_relations_rc,0,1,2)
 
@@ -258,50 +186,10 @@ common_relations_rc = combine_components(common_relations,common_relations_rc,0,
 common_relations_rc_1 = []
 common_relations_rc_1 = combine_components(common_relations_rc,common_relations_rc_1,0,2,1)
 
-
-
-
-#Since the input to further task is required in encoded utf8 form
 for i in common_relations_rc_1:
 	i[0] = i[0].encode('utf8')
 	i[1] = i[1].encode('utf8')
 	i[2] = i[2].encode('utf8')
-
-'''
-For the same first and third component, it selects only one element
-
-
-Oskar-Schindler, saved multiple, Jews
-Oskar-Schindler, saved, Jews
-Oskar-Schindler, helped, Jews
-
-It selects only one of them
-'''
-newer1 = []
-flag = [0 for i in range(len(common_relations_rc_1))]
-for i in range(len(common_relations_rc_1)):
-	for j in range(len(common_relations_rc_1)):
-		'''
-		#Excludes element which has redundant components which have 2nd and third component almost similar.
-		'''
-		if intersection(common_relations_rc_1[i][1],common_relations_rc_1[i][2]) >= 2:
-			flag[i] = 1
-			break	
-		if flag[i] == 0 and i != j:
-			if common_relations_rc_1[i][0] in common_relations_rc_1[j][0] or common_relations_rc_1[j][0] in common_relations_rc_1[i][0]:
-				if common_relations_rc_1[i][2] in common_relations_rc_1[j][2] or common_relations_rc_1[j][2] in common_relations_rc_1[i][2]:
-					flag[j] = 1
-	if flag[i] == 0:
-		newer1.append(common_relations_rc_1[i])
-	
-common_relations_rc_1 = newer1[:]
-
-
-
-
-###############################################################################
-'''
-EXCESS CODE. DONT REUSE.
 
 #Excludes element which has redundant components which have 2nd and third component almost similar.
 common_relations_rc_2 = []
@@ -313,26 +201,10 @@ for i in range(len(common_relations_rc_1)):
 			break	
 	if flag[i] == 0:
 		common_relations_rc_2.append(common_relations_rc_1[i])
+		
 
 
-#common_relations_rc_3 = common_relations_rc_2[:] instead of the next line		
-'''
-###############################################################################
-
-
-
-
-
-
-'''
-Removes redudant elements for which 
-element1[0] == element2[0]
-element1 != element2 
-but element1[0]+element1[1]+element1[2] == element2[0]+element2[1]+element2[2]
-
-Removes one of them
-'''
-common_relations_rc_2 = common_relations_rc_1[:] #Remove this line if the above commented code is used
+#Removes redudant elements for which element1[0] == element2[0], element1 != element2 but element1[0]+element1[1]+element1[2] == element2[0]+element2[1]+element2[2]
 common_relations_rc_3 = common_relations_rc_2[:]
 for i in range(len(common_relations_rc_2)):
 	two_three = common_relations_rc_2[i][1] + ' ' + common_relations_rc_2[i][2] #two_three is component two and three appended as a string
@@ -349,33 +221,7 @@ for i in range(len(common_relations_rc_2)):
 				common_relations_rc_3.remove(common_relations_rc_2[i])
 				break
 			
-
-
-
-
-#Adjacency matrix. To find out the degree of connections for each node
-'''
-This creates an adjacency matrix and with 
-Matrix[A][B] = 1 only if A -> B (A is connected to B).
-
-It should be like a directed graph. A -> B does not imply B -> A necessarily.
-
-Now we find out the total number of connections a node has with other nodes,
-which have connections further with more nodes. Thus, all the recursive connections,
-a node has have to be calculated for each node.
-
-A -> B
-A -> C
-B -> D
-B -> E
-D -> F
-G -> I
-
-Here, A is directly connected to B and C and indirectly connected to
-D, E and F
-
-Thus A has 5 connections
-'''	
+#Adjacency matrix. To find out the degree of connections for each node	
 list_matrix = []
 for i in common_relations_rc_3:
 	if i[0] not in list_matrix:
@@ -387,12 +233,6 @@ matrix = [[0 for i in list_matrix] for j in list_matrix]
 
 for i in common_relations_rc_3:
 	matrix[list_matrix.index(i[0])][list_matrix.index(i[2])] = 1 
-
-
-'''
-count is the list of connections of all nodes
-listmatrix is the list of all nodes
-'''
 
 
 count = [1 for i in list_matrix]  #Stores degree of connection 
@@ -413,110 +253,61 @@ for i in range(len(matrix)):
 		z += 1
 	count[i] += len(major)
 
-
 combo = dict(zip(list_matrix,count))
 list_of_elements_combo = sorted(combo.items(),key=operator.itemgetter(1),reverse=False) #ascending
+print "\n\n\n\n\n\n\n\n\n\n\n\n^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
+print list_of_elements_combo
+print "\n\n\n\n\n\n\n\n\n\n\n\n^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
 keys = [i[0] for i in list_of_elements_combo]
 values = [i[1] for i in list_of_elements_combo]
 
-
-'''
-imp_nodes contains the top 3 most connected words.
-
-We use these nodes to winnow further the input text to the text
-which only includes the sentences containing these words or
-related/referring pronouns.
-'''
-
-
-imp_nodes = keys[:] 
-
-flagged_sentences = [0 for i in range(len(relations_pronouns))]
-reduced_text_list = []
-
-
-
-#Checks for sentences with pronouns replaced by imp_nodes also
-'''
-Identifies the elements in which the pronouns were replaced by one of the
-words in imp_nodes. Marks the flag against them.
-
-flag_sentences = flags against the elements in relations_pronouns
-'''
 for i in common_relations_rc_3:
-	tagflag = 0
-	for j in imp_nodes:
-		if intersection(j,i[0]) >= 1 or intersection(j,i[1]) >= 1 or intersection(j,i[2]) >= 1:
-			for k in relations_pronouns:
-				if flagged_sentences[relations_pronouns.index(k)] == 0:	
-					if k[1] in i[1] or i[1] in k[1]:
-						if k[2] in i[2] or i[2] in k[2]:	
-							flagged_sentences[relations_pronouns.index(k)] = 1
-							tagflag = 1
-							break
-						
-					
-			if tagflag == 1:
-				break
-		
+	if i[0] == '' or i[1] == '' or i[2] == '':
+		common_relations_rc_3.remove(i)
+	print i
 	
-#for i in relations_pronouns:
-	#print i, flagged_sentences[relations_pronouns.index(i)]
+generate_graphviz_graph(common_relations_rc_3,verbose=True)
+
+#generate_graphviz_graph(common_relations_rc_3,verbose=True)
+
+os.system('mv /tmp/openie/out.png ./')
 
 
+#Content written in sorter.txt. Imported from nltk_tagger_rake.py. Selects top 1/3rd statements which occur first in order of appearance. Scores for each sentence are calculated on the basis of presence of top nodes. Sum of these degrees of nodes is equivalent to score of sentence
+content_no_dot = content_no_dot.split('.')
+scored_sent = [0 for i in range(len(content_no_dot))]
+#Calculates scores for each sentences
+for i in range(len(content_no_dot)):
+	print '*********',content_no_dot[i],'*********'
+	if content_no_dot[i].lower() not in stoplist:	
+		for k in range(len(keys)):
+			if intersection(content_no_dot[i],keys[k]) >= 1:
+				scored_sent[i] += values[k]
+				print '------------',content_no_dot[i], keys[k], intersection(content_no_dot[i],keys[k]), values[k]
 
+for i in range(len(content_no_dot)):	
+	print content_no_dot[i], scored_sent[i], '\n'
 
-#Checks only for sentences with the imp_nodes
-'''
-Simply checks and marks the flag of the sentence if it contains any of
-the imp_nodes words
-'''
-flagged_all = [0 for i in range(len(complete_text_list))]
-for i in complete_text_list:
-	count = 0
-	for j in imp_nodes:
-		if intersection(j,i):
-			count += 1
-	if count != 0:
-		flagged_all[complete_text_list.index(i)] = 1
+for i in content_no_dot:
+	j = i.strip()
+	if j == '':
+		content_no_dot.remove(i)
 
-'''
-For pronouns which are replaced by one of the imp_nodes earlier in the stage,
-it identifies which sentence they belonged to and marks the flag of that
-sentence.
-'''
-k = 0
-for i in complete_text_list:
-	if flagged_all[complete_text_list.index(i)] == 1:
-		continue
-	for j in range(k,len(flagged_sentences)):
-		if flagged_sentences[j] == 1:
-			if relations_pronouns[j][0] in i and relations_pronouns[j][1] in i and relations_pronouns[j][2] in i:
-				 flagged_all[complete_text_list.index(i)] = 1
-				 k = j
-				 break
+index_sent = [i for i in range(len(content_no_dot))]	
+sent_dict = dict(zip(index_sent,scored_sent))
+#Sorts sentences based on decreasing order of scores
+sent_sorted = sorted(sent_dict.items(),key=operator.itemgetter(1),reverse=True)
 
-reduced_text = ''
-for i in range(len(flagged_all)):
-	if flagged_all[i] == 1:
-		reduced_text += complete_text_list[i].strip() + '. '
+#Selects top 1/3rd sentences
+#sent_sorted_20 = dict(sent_sorted[:len(content_no_dot)/3])
+if len(content_no_dot)/4 >= 20:	
+	sent_sorted_20 = dict(sent_sorted[:20])
+else:
+	sent_sorted_20 = dict(sent_sorted[:int(len(content_no_dot)/3.5)])
+#Sorts these top 1/3rd obtained sentences in increasing order of their appearance in the input text 
+inorder_sent_sorted_20 = sorted(sent_sorted_20.items(),key=operator.itemgetter(0),reverse=False)
 
-
-'''
-This text now includes only the important sentences containing the words in imp_nodes
-or the sentences with pronouns which were replaced by one of the words in imp_nodes.
- 
-Writes to sorter_part2.txt which will be used as an input to the text summarizer program again.
-'''
-new_text = open('sorter_part2.txt','w+')
-
-
-'''
-This text does not contain paragraphs and hence we cannot extract 3-5 number
-of keyphrases per paragraph in the next step. We instead take a large number
-of keyphrases around 25 in this sole paragraph.
-'''
-#without paragraphs. All sentences lie in one para here
-new_text.write(reduced_text.replace('<dot>','.'))
-
+for index,score in inorder_sent_sorted_20:
+	#print score, '--->', content_no_dot[index],'\n'
+	print content_no_dot[index].strip().replace('<dot>','.') + '.'
 

@@ -93,11 +93,11 @@ ________________________________________________________________________________
 
 Thus based on a purely statistical approach, we first obtained the top keyphrases,
 and then using a logical approach of getting an intersection between RAKE and OpenIE
-output we restricted the sentences to be processed. Then a more reliable semantic approach
+output we restricted the sentences to be processed. Then a more reliable approach
 was used to find the connectivity of nodes. The nodes now obtained by finding the
 connectivity are more reliable than the initially obtained keyphrases from just RAKE.
 Thus, from purely numerical, limited, and not totally reliable statistics we converged
-towards a more reliable and logical approach to find important words in the text.
+towards a more reliable and logical approach to find important words in the  text.
 This was further used to find sentences which consisted of these important words to
 form the summary.
 
@@ -124,84 +124,3 @@ ________________________________________________________________________________
    use graphviz to generate graph
 
 5) networkx to generate graph
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-1) RAKE (Rapid Automatic Keyword Extraction) was used to extract keywords.
-
-2) The scoring of the keywords was done based on the their word frequencies and
-   word degrees with the score given by =\> Score = \dfrac{Word\hspace{1mm} Degree}{Word \hspace{1mm}Frequency}
-
-3) We split the sentences on multiple punctuation marks and words except nouns and verbs
-   to obtain keyphrases(consecutively occurring keywords). Then we calculate the scores 
-   for each keyphrases based on sum of scores of respective keywords. Then sort and 
-   display them in descending order.
-
-4) Any keyphrase extractor that gives the best results can be used till this point. 
-	
-5) At this stage, we find the subject – action – object mapping for every sentence. This 
-   will vary with active and passive voice of the sentence. We used Stanford's Open 
-   Information Extractor (OpenIE).
-
-6) From the keyphrases extracted, we select the ones which have OpenIE's subject output 
-   in them. This list of keyphrases now obtained is the final list and the one we will 
-   work on. These keyphrases are assumed to have more signifance as they also are the 
-   subjects in sentences. 
-
-7) Then pronouns are replaced by proper nouns(if present) which occur immediately
-   in the next sentence to get better output.
-
-8) Proper nouns are replaced by proper nouns consisting them
-   (Name and Name-Surname if present both are considered as Name-Surname)
-   to avoid redundancy and avoid sharing of importance.
-
-****** After this all sorts of post processing is done on the output of OpenIE output
-to remove redundancy and get only the required output. These steps are necessary as
-OpenIE gives very redundant subject – action – verb combinations. ******
-
-9) We then form adjacency matrix of all the nodes(subject and object in the processed
-   OpenIE output), to get connectivity of each node. It is a directed graph.
-
-10) We then sort the nodes in descending order of connectivity and pick up the
-    top 3 nodes.
-
-11) Now the winnowing process is done wherein we select the sentences including
-    at least one of these top 3 nodes.
-
-12) We treat this collection of sentences as our new input text and do all the
-    above steps till step 9.
-
-13) We then assign scores to each of the sentences based on the presence of the
-    nodes with the score being equivalent to the sum of the connectivity of each
-    node present.
-
-14) We then select the top 1/3 rd of these sentences and print them on the basis
-    of their occurence in the original text.
-
-15) This forms our summary for the original input.

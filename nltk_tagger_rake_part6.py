@@ -19,10 +19,10 @@ import nltk
 
 
 #File containing text
-#content1 = open('sorter_part2.txt','r').read() # for winnowing
-content1 = open('input.txt','r').read() #for nowinnowing
+content1 = open('important.txt','r').read()
+#content1 = open('important.txt','r').read()
 contentforsplit = content1[:]
-sorter = open('sorter_3.txt','w')
+sorter = open('sorter_6.txt','w')
 
 stoplistlines = open("stopwords1.txt",'r').readlines()
 stoplist = []
@@ -114,7 +114,7 @@ def preprocess(content1):
 	#Made global since it is imported in proc_part2.py
 	global content_no_dot
 	content_no_dot = phraseStr1[:]
-	content_no_dot = content_no_dot.encode('utf8').replace('-< dot >-','<dot>').replace('-< dot >','<dot>').replace('< dot >-','<dot>').replace(' <dot> ','<dot>')
+	content_no_dot = content_no_dot.encode('utf8').replace('-< dot >','<dot>').replace('< dot >-','<dot>')
 	print content_no_dot
 	phraseStr1 = phraseStr1.replace('<dot>', '.') #for Open IE
 	sent = nltk.sent_tokenize(content.decode('utf-8'))
@@ -351,7 +351,7 @@ def main():
 	#Does preprocessing on the input text
 	content = preprocess(content1)
 
-
+	#Comment rest of the following functions
 	
 	#Splits processed input text on multiple symbols 
 	contentList = contentSplit(content)

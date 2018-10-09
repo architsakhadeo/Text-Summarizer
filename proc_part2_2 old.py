@@ -1,20 +1,18 @@
+import math
 '''
 [subject,verb,object] -> element
 for component in element 
 '''
-from copy import deepcopy
+
 from mained import relations
 import nltk
 import operator
-from nltk_tagger_rake import new_sort_list, content_no_dot
+from nltk_tagger_rake_part2 import new_sort_list, content_no_dot
 from mained import generate_graphviz_graph
 import os
 import sys
 import re
-from nltk_tagger_rake import word_frequency, word_degree
-
-
-
+from nltk_tagger_rake_part2 import word_frequency, word_degree
 
 #Stopwords list
 stoplistlines = open("stopwords1.txt",'r').readlines()
@@ -23,14 +21,8 @@ for i in stoplistlines:
 	stoplist.append(i.strip().lower())
 
 
-complete_text = content_no_dot[:]
-complete_text_list = complete_text.split('.')    #####Think about this for other punctuations
-
-relations_pronouns = deepcopy(relations)
-
-
-
-	
+##for i in relations:
+	#print i
 #Function to find the total overlap between two strings
 def intersection(string1,string2):
 	'''
@@ -54,7 +46,6 @@ def intersection(string1,string2):
 		min_list[i] = min_list[i].lower()
 	for i in range(len(max_list)):
 		max_list[i] = max_list[i].lower()
-
 	for w in range(len(min_list)):
 		if min_list[w] in max_list:
 			count_min += 1
@@ -65,12 +56,9 @@ def intersection(string1,string2):
 	return count
 
 
-
-
 #Removes the verbs from the components
 '''
 Noun + Verb -> Noun
-
 '''
 def remove_verbs_merge(component):
 	verb = ['VB','VBD','VBG','VBN','VBZ','VBP']
@@ -84,9 +72,7 @@ def remove_verbs_merge(component):
 	string_component = ' '.join(string_component)
 	return string_component
 
-
-
-#Compares components at multiple indices to merge them into one thus decreasing the redundancy
+#Combines multiple similar components with one different output index component
 '''
 input_list -> OpenIE output before processing
 output_list -> OpenIE output after processing
@@ -108,8 +94,6 @@ def combine_components(input_list,output_list,index1,index2,output_index):
 			if input_list[i][index1] in input_list[j][index1] or input_list[j][index1] in input_list[i][index1]: 
 				if input_list[i][index2] in input_list[j][index2] or input_list[j][index2] in input_list[i][index2]:
 					part.append(input_list[j][output_index])
-		
-		
 		part1 = part[:]
 		for k in range(len(part)):
 			z = part[k].split(' ')
@@ -141,8 +125,6 @@ def combine_components(input_list,output_list,index1,index2,output_index):
 	return output_list
 
 
-
-
 #Replaces pronouns by previously encountered Proper Nouns
 '''
 
@@ -153,7 +135,6 @@ containing a proper noun.
 '''
 pronouns = ['WP', 'PRP', '$WP', '$PRP']
 proper_nouns = ['NNP','NN']
-
 for i in range(len(relations)):
 	component_tagged = nltk.pos_tag(nltk.word_tokenize(relations[i][0]))	
 	if component_tagged[0][1] in pronouns: #**************don't predict the pronoun and proper noun to be in 0th index in both. find the index of the pronoun and propernoun. Put this above before merging first components -> Osker-Schindler and Schindler friendship. Check for the proper noun above. Move this above later. 
@@ -165,6 +146,7 @@ for i in range(len(relations)):
 
 
 
+
 #--------------------------------------------------------------------------------------------
 #Code to remove verbs and merge has been removed but is located on Github
 #in previous commits and is not required.
@@ -172,15 +154,17 @@ for i in range(len(relations)):
 
 
 
+
+
 #Since the input to further task is required in decoded utf8 form
 for i in relations:
 	i[0] = i[0].decode('utf-8')
-	i[1] = i[1].decode('utf-8')	
+	i[1] = i[1].decode('utf-8')
 	i[2] = i[2].decode('utf-8')	
-	
-	
-	
-	
+
+
+
+
 #Finds overlap between the subjects found from OpenIE and the keywords obtained from keyword extraction phase
 '''
 OpenIE output              Keywords  
@@ -206,17 +190,15 @@ for i in relations:
 			common_relations.append(i)
 
 
-print common_relations
-
-
 #Replaces words like Schindler with Oskar-Schindler. Basically reduces redundancy by having just Oskar-Schindler instead of Oskar, Schindler, Oskar-Schindler separately.
+
 for i in range(len(common_relations)):
 	for z in range(len(common_relations)):
-		flag = 0
 		if i != z: 
 			if intersection(common_relations[i][0].lower(),common_relations[z][0].lower()) >= 1:
 				component_1_i = common_relations[i][0].split() #component_1_i - 1st component in common_relations[i] i.e. element of first loop
 				component_1_z = common_relations[z][0].split() #component_1_z - 1st component in common_relations[j] i.e. element of second loop
+				flag = 0
 				for component_1_i_word in component_1_i:
 					for component_1_z_word in component_1_z:
 						if component_1_i_word in component_1_z_word or component_1_z_word in component_1_i_word:
@@ -233,14 +215,9 @@ for i in range(len(common_relations)):
 								break
 					if flag == 1:
 						break
-		
 				if flag == 1:
 					if maxima1 not in common_relations[i][0]:
 						common_relations[i][0] = common_relations[i][0].replace(minima1,maxima1)
-
-
-
-
 
 
 #Combining third components if there are substrings in components. It checks if 1st and 2nd components are similar, then it merges third components for the same
@@ -258,14 +235,16 @@ common_relations_rc = combine_components(common_relations,common_relations_rc,0,
 common_relations_rc_1 = []
 common_relations_rc_1 = combine_components(common_relations_rc,common_relations_rc_1,0,2,1)
 
+			
 
+#common_relations_rc_1 = newer[:]
 
-
-#Since the input to further task is required in encoded utf8 form
 for i in common_relations_rc_1:
 	i[0] = i[0].encode('utf8')
 	i[1] = i[1].encode('utf8')
 	i[2] = i[2].encode('utf8')
+
+
 
 '''
 For the same first and third component, it selects only one element
@@ -275,8 +254,10 @@ Oskar-Schindler, saved multiple, Jews
 Oskar-Schindler, saved, Jews
 Oskar-Schindler, helped, Jews
 
-It selects only one of them
+It selects only one of them as it is assumed that they'd belong to the same sentence
 '''
+
+
 newer1 = []
 flag = [0 for i in range(len(common_relations_rc_1))]
 for i in range(len(common_relations_rc_1)):
@@ -322,8 +303,6 @@ for i in range(len(common_relations_rc_1)):
 
 
 
-
-
 '''
 Removes redudant elements for which 
 element1[0] == element2[0]
@@ -349,10 +328,6 @@ for i in range(len(common_relations_rc_2)):
 				common_relations_rc_3.remove(common_relations_rc_2[i])
 				break
 			
-
-
-
-
 #Adjacency matrix. To find out the degree of connections for each node
 '''
 This creates an adjacency matrix and with 
@@ -375,7 +350,7 @@ Here, A is directly connected to B and C and indirectly connected to
 D, E and F
 
 Thus A has 5 connections
-'''	
+'''		
 list_matrix = []
 for i in common_relations_rc_3:
 	if i[0] not in list_matrix:
@@ -388,13 +363,10 @@ matrix = [[0 for i in list_matrix] for j in list_matrix]
 for i in common_relations_rc_3:
 	matrix[list_matrix.index(i[0])][list_matrix.index(i[2])] = 1 
 
-
 '''
 count is the list of connections of all nodes
 listmatrix is the list of all nodes
 '''
-
-
 count = [1 for i in list_matrix]  #Stores degree of connection 
 for i in range(len(matrix)):
 	major = []
@@ -414,109 +386,295 @@ for i in range(len(matrix)):
 	count[i] += len(major)
 
 
+
 combo = dict(zip(list_matrix,count))
 list_of_elements_combo = sorted(combo.items(),key=operator.itemgetter(1),reverse=False) #ascending
 keys = [i[0] for i in list_of_elements_combo]
 values = [i[1] for i in list_of_elements_combo]
 
+for i in common_relations_rc_3:
+	if i[0] == '' or i[1] == '' or i[2] == '':
+		common_relations_rc_3.remove(i)
 
 '''
-imp_nodes contains the top 3 most connected words.
+This generates graph by graphviz with the elements from common_relations_rc_3
+such that
 
-We use these nodes to winnow further the input text to the text
-which only includes the sentences containing these words or
-related/referring pronouns.
+                  ACTION
+SUBJECT -------------------------> OBJECT
+
+
+'''
+	
 '''
 
-
-imp_nodes = keys[:] 
-
-flagged_sentences = [0 for i in range(len(relations_pronouns))]
-reduced_text_list = []
+#generate_graphviz_graph(common_relations_rc_3,verbose=True)
 
 
-
-#Checks for sentences with pronouns replaced by imp_nodes also
+generate_graphviz_graph(common_relations_rc_3,verbose=True)
+os.system('mv /tmp/openie/out.png ./')
 '''
-Identifies the elements in which the pronouns were replaced by one of the
-words in imp_nodes. Marks the flag against them.
 
-flag_sentences = flags against the elements in relations_pronouns
+'''
+Content written in sorter.txt. Imported from nltk_tagger_rake.py. Selects top 1/3rd statements which occur first in order of appearance. Scores for each sentence are calculated on the basis of presence of top nodes. Sum of these degrees of nodes is equivalent to score of sentence
+'''
+content_no_dot = content_no_dot.split('.')
+scored_sent = [0 for i in range(len(content_no_dot))]
+
+
+
+#Calculates scores for each sentences
+'''
+Score of a sentence = Sum(Number of connections for each node present in it)
+'''
+for i in range(len(content_no_dot)):
+	if content_no_dot[i].lower() not in stoplist:	
+		for k in range(len(keys)):
+			if intersection(content_no_dot[i],keys[k]) >= 1:
+				scored_sent[i] += values[k]
+
+
+for i in content_no_dot:
+	j = i.strip()
+	if j == '':
+		content_no_dot.remove(i)
+
+index_sent = [i for i in range(len(content_no_dot))]	
+sent_dict = dict(zip(index_sent,scored_sent))
+
+
+
+#Sorts sentences based on decreasing order of scores
+sent_sorted = sorted(sent_dict.items(),key=operator.itemgetter(1),reverse=True)
+
+
+
+#Selects top 1/3rd sentences
+#sent_sorted_20 = dict(sent_sorted[:len(content_no_dot1)/3])
+import re
+words = []
+content_no_dot1 = open('sorter_3.txt','r').read().split('.')
+'''
+for i in content_no_dot1:
+	no_words = len(re.findall(r'\s\w+',i)) + 1
+	words.append(no_words)
+
+total_words = sum(words)
+third_total = sum(words) * 0.1
+
+summation_words = 0 
+index_words = 0
+for i in range(len(content_no_dot1)):
+	summation_words += words[i]
+	if summation_words >= third_total:
+		index_words = i
+		break
+'''
+'''
+if len(content_no_dot)/3.5 >= 20:	
+	sent_sorted_top = dict(sent_sorted[:20])
+else:
+	sent_sorted_top = dict(sent_sorted[:int(len(content_no_dot)/3.5)])
+'''	
+
+
+
+#sent_sorted_top = dict(sent_sorted[:index_words])	
+sent_sorted_top_10 = dict(sent_sorted[:int(math.ceil(len(content_no_dot1)*0.1))])	
+#Sorts these top 1/3rd obtained sentences in increasing order of their appearance in the input text 
+inorder_sent_sorted_top_10 = sorted(sent_sorted_top_10.items(),key=operator.itemgetter(0),reverse=False)
+
+
+print '\n\n\n\n\n\nSummary is\n\n\n'
+strstrstr_10 = ""
+for index,score in inorder_sent_sorted_top_10:
+	strstrstr_10 += str(content_no_dot[index].strip().replace('<dot>','.')) + '.\n'
+	print content_no_dot[index].strip().replace('<dot>','.') + '.'
+
+filer_10 = open('summary_10.txt','w')
+filer_10.write(strstrstr_10)
+
+
+
+
+
+
+sent_sorted_top_25 = dict(sent_sorted[:int(math.ceil(len(content_no_dot1)*0.25))])	
+#Sorts these top 1/3rd obtained sentences in increasing order of their appearance in the input text 
+inorder_sent_sorted_top_25 = sorted(sent_sorted_top_25.items(),key=operator.itemgetter(0),reverse=False)
+
+
+print '\n\n\n\n\n\nSummary is\n\n\n'
+strstrstr_25 = ""
+for index,score in inorder_sent_sorted_top_25:
+	strstrstr_25 += str(content_no_dot[index].strip().replace('<dot>','.')) + '.\n'
+	print content_no_dot[index].strip().replace('<dot>','.') + '.'
+
+filer_25 = open('summary_25.txt','w')
+filer_25.write(strstrstr_25)
+
+
+
+
+
+
+
+
+
+sent_sorted_top_33 = dict(sent_sorted[:int(math.ceil(len(content_no_dot1)*0.33))])	
+#Sorts these top 1/3rd obtained sentences in increasing order of their appearance in the input text 
+inorder_sent_sorted_top_33 = sorted(sent_sorted_top_33.items(),key=operator.itemgetter(0),reverse=False)
+
+
+print '\n\n\n\n\n\nSummary is\n\n\n'
+strstrstr_33 = ""
+for index,score in inorder_sent_sorted_top_33:
+	strstrstr_33 += str(content_no_dot[index].strip().replace('<dot>','.')) + '.\n'
+	print content_no_dot[index].strip().replace('<dot>','.') + '.'
+
+filer_33 = open('summary_33.txt','w')
+filer_33.write(strstrstr_33)
+
+
+
+sent_sorted_top_39 = dict(sent_sorted[:int(math.ceil(len(content_no_dot1)*0.39))])	
+#Sorts these top 1/3rd obtained sentences in increasing order of their appearance in the input text 
+inorder_sent_sorted_top_39 = sorted(sent_sorted_top_39.items(),key=operator.itemgetter(0),reverse=False)
+
+
+print '\n\n\n\n\n\nSummary is\n\n\n'
+strstrstr_39 = ""
+for index,score in inorder_sent_sorted_top_39:
+	strstrstr_39 += str(content_no_dot[index].strip().replace('<dot>','.')) + '.\n'
+	print content_no_dot[index].strip().replace('<dot>','.') + '.'
+
+filer_39 = open('summary_39.txt','w')
+filer_39.write(strstrstr_39)
+
+
+
+sent_sorted_top_45 = dict(sent_sorted[:int(math.ceil(len(content_no_dot1)*0.45))])	
+#Sorts these top 1/3rd obtained sentences in increasing order of their appearance in the input text 
+inorder_sent_sorted_top_45 = sorted(sent_sorted_top_45.items(),key=operator.itemgetter(0),reverse=False)
+
+
+print '\n\n\n\n\n\nSummary is\n\n\n'
+strstrstr_45 = ""
+for index,score in inorder_sent_sorted_top_45:
+	strstrstr_45 += str(content_no_dot[index].strip().replace('<dot>','.')) + '.\n'
+	print content_no_dot[index].strip().replace('<dot>','.') + '.'
+
+filer_45 = open('summary_45.txt','w')
+filer_45.write(strstrstr_45)
+
+
+sent_sorted_top_15 = dict(sent_sorted[:int(math.ceil(len(content_no_dot1)*0.15))])	
+#Sorts these top 1/3rd obtained sentences in increasing order of their appearance in the input text 
+inorder_sent_sorted_top_15 = sorted(sent_sorted_top_15.items(),key=operator.itemgetter(0),reverse=False)
+
+
+print '\n\n\n\n\n\nSummary is\n\n\n'
+strstrstr_15 = ""
+for index,score in inorder_sent_sorted_top_15:
+	strstrstr_15 += str(content_no_dot[index].strip().replace('<dot>','.')) + '.\n'
+	print content_no_dot[index].strip().replace('<dot>','.') + '.'
+
+filer_15 = open('summary_15.txt','w')
+filer_15.write(strstrstr_15)
+
+
+sent_sorted_top_20 = dict(sent_sorted[:int(math.ceil(len(content_no_dot1)*0.20))])	
+#Sorts these top 1/3rd obtained sentences in increasing order of their appearance in the input text 
+inorder_sent_sorted_top_20 = sorted(sent_sorted_top_20.items(),key=operator.itemgetter(0),reverse=False)
+
+
+print '\n\n\n\n\n\nSummary is\n\n\n'
+strstrstr_20 = ""
+for index,score in inorder_sent_sorted_top_20:
+	strstrstr_20 += str(content_no_dot[index].strip().replace('<dot>','.')) + '.\n'
+	print content_no_dot[index].strip().replace('<dot>','.') + '.'
+
+filer_20 = open('summary_20.txt','w')
+filer_20.write(strstrstr_20)
+
+
 '''
 for i in common_relations_rc_3:
-	tagflag = 0
-	for j in imp_nodes:
-		if intersection(j,i[0]) >= 1 or intersection(j,i[1]) >= 1 or intersection(j,i[2]) >= 1:
-			for k in relations_pronouns:
-				if flagged_sentences[relations_pronouns.index(k)] == 0:	
-					if k[1] in i[1] or i[1] in k[1]:
-						if k[2] in i[2] or i[2] in k[2]:	
-							flagged_sentences[relations_pronouns.index(k)] = 1
-							tagflag = 1
-							break
-						
-					
-			if tagflag == 1:
-				break
+	for j in range(len(i)):
+		i[j] = i[j].decode('utf-8')
 		
-	
-#for i in relations_pronouns:
-	#print i, flagged_sentences[relations_pronouns.index(i)]
+
+#To draw graph by networkx
+import networkx as nx
+import matplotlib.pyplot as plt
+
+
+
+def draw_graph(graph, labels=None, graph_layout='shell',
+               node_size=1600, node_color='blue', node_alpha=0.3,
+               node_text_size=12,
+               edge_color='blue', edge_alpha=0.3, edge_tickness=1,
+               edge_text_pos=0.3,
+               text_font='sans-serif'):
+
+    # create networkx graph
+    G=nx.Graph()
+
+    # add edges
+    for edge in graph:
+        G.add_edge(edge[0], edge[1])
+
+    # these are different layouts for the network you may try
+    # shell seems to work best
+    if graph_layout == 'spring':
+        graph_pos=nx.spring_layout(G)
+    elif graph_layout == 'spectral':
+        graph_pos=nx.spectral_layout(G)
+    elif graph_layout == 'random':
+        graph_pos=nx.random_layout(G)
+    else:
+        graph_pos=nx.shell_layout(G)
+
+    # draw graph
+    nx.draw_networkx_nodes(G,graph_pos,node_size=node_size, 
+                           alpha=node_alpha, node_color=node_color)
+    nx.draw_networkx_edges(G,graph_pos,width=edge_tickness,
+                           alpha=edge_alpha,edge_color=edge_color)
+    nx.draw_networkx_labels(G, graph_pos,font_size=node_text_size,
+                            font_family=text_font)
+
+    if labels is None:
+        labels = range(len(graph))
+
+    edge_labels = dict(zip(graph, labels))
+    nx.draw_networkx_edge_labels(G, graph_pos, edge_labels=edge_labels, 
+                                 label_pos=edge_text_pos)
+
+    # show graph
+    plt.show()
+
+#graph = [(0, 1), (1, 5), (1, 7), (4, 5), (4, 8), (1, 6), (3, 7), (5, 9),
+#         (2, 4), (0, 4), (2, 5), (3, 6), (8, 9)]
+
+graph = []
+
+for i in common_relations_rc_3:
+	graph.append((i[0],i[2]))
+
+
+labels = []
+for i in common_relations_rc_3:
+	labels.append(i[1])
+
+# you may name your edge labels
+#labels = map(chr, range(65, 65+len(graph)))
+draw_graph(graph, labels)
+
+# if edge labels is not specified, numeric labels (0, 1, 2...) will be used
+#draw_graph(graph)
 
 
 
 
-#Checks only for sentences with the imp_nodes
+
 '''
-Simply checks and marks the flag of the sentence if it contains any of
-the imp_nodes words
-'''
-flagged_all = [0 for i in range(len(complete_text_list))]
-for i in complete_text_list:
-	count = 0
-	for j in imp_nodes:
-		if intersection(j,i):
-			count += 1
-	if count != 0:
-		flagged_all[complete_text_list.index(i)] = 1
-
-'''
-For pronouns which are replaced by one of the imp_nodes earlier in the stage,
-it identifies which sentence they belonged to and marks the flag of that
-sentence.
-'''
-k = 0
-for i in complete_text_list:
-	if flagged_all[complete_text_list.index(i)] == 1:
-		continue
-	for j in range(k,len(flagged_sentences)):
-		if flagged_sentences[j] == 1:
-			if relations_pronouns[j][0] in i and relations_pronouns[j][1] in i and relations_pronouns[j][2] in i:
-				 flagged_all[complete_text_list.index(i)] = 1
-				 k = j
-				 break
-
-reduced_text = ''
-for i in range(len(flagged_all)):
-	if flagged_all[i] == 1:
-		reduced_text += complete_text_list[i].strip() + '. '
-
-
-'''
-This text now includes only the important sentences containing the words in imp_nodes
-or the sentences with pronouns which were replaced by one of the words in imp_nodes.
- 
-Writes to sorter_part2.txt which will be used as an input to the text summarizer program again.
-'''
-new_text = open('sorter_part2.txt','w+')
-
-
-'''
-This text does not contain paragraphs and hence we cannot extract 3-5 number
-of keyphrases per paragraph in the next step. We instead take a large number
-of keyphrases around 25 in this sole paragraph.
-'''
-#without paragraphs. All sentences lie in one para here
-new_text.write(reduced_text.replace('<dot>','.'))
-
-

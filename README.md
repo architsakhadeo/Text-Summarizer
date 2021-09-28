@@ -22,17 +22,17 @@ Running the code
 _________________________________________________________________________________________
 
   
-  > 1) Change the variable "input_content" to input file name (input.txt) in the nltk_tagger_rake.py 
+  > 1) Change the variable "input_content" to input file name (input.txt) in the stage1_nowinnowing.py 
   >   
-  > 2) python nltk_tagger_rake_part2.py -> gives keyphrases
+  > 2) python stage1_nowinnowing.py -> gives keyphrases
   >
-  > 3) python proc_part2_4.py -f sorter_3.txt -> gives relation between objects and subject(common to keyphrases)
+  > 3) python proc_ranker.py -f outputs/output_file.txt -> gives relation between objects and subject(common to keyphrases)
   >
   > 4) Check for the out.png image for graphical representation provided by Open IE
   
 or Just run script.sh
 
-  > 1) Change the variable "input_content" to input file name (input.txt) in the nltk_tagger_rake.py
+  > 1) Change the variable "input_content" to input file name (input.txt) in the stage1_nowinnowing.py
   >
   >2) bash script.sh
 

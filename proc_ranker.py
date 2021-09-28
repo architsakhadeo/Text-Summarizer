@@ -7,15 +7,15 @@ for component in element
 from mained import relations
 import nltk
 import operator
-from nltk_tagger_rake_part2 import new_sort_list, content_no_dot, word_frequency, word_degree
+from stage1_nowinnowing import new_sort_list, content_no_dot, word_frequency, word_degree
 from mained import generate_graphviz_graph
 import os
 import sys
 import re
-from nltk_tagger_rake_part2 import word_frequency, word_degree
+from stage1_nowinnowing import word_frequency, word_degree
 
 #Stopwords list
-stoplistlines = open("stopwords1.txt",'r').readlines()
+stoplistlines = open("inputs/stopwords.txt",'r').readlines()
 stoplist = []
 for i in stoplistlines:
 	stoplist.append(i.strip().lower())
@@ -107,7 +107,6 @@ def combine_components(input_list,output_list,index1,index2,output_index):
 						if part[k] in part1:
 							part1.remove(part[k])
 	
-	
 		'''
 		This combines the processed elements to give a list of non redundant elements
 		'''
@@ -152,18 +151,11 @@ for i in range(len(relations)):
 #in previous commits and is not required.
 #--------------------------------------------------------------------------------------------
 
-
-
-
-
 #Since the input to further task is required in decoded utf8 form
 for i in relations:
 	i[0] = i[0].decode('utf-8')
 	i[1] = i[1].decode('utf-8')
 	i[2] = i[2].decode('utf-8')	
-
-
-
 
 #Finds overlap between the subjects found from OpenIE and the keywords obtained from keyword extraction phase
 '''
@@ -235,16 +227,12 @@ common_relations_rc = combine_components(common_relations,common_relations_rc,0,
 common_relations_rc_1 = []
 common_relations_rc_1 = combine_components(common_relations_rc,common_relations_rc_1,0,2,1)
 
-			
-
 #common_relations_rc_1 = newer[:]
 
 for i in common_relations_rc_1:
 	i[0] = i[0].encode('utf8')
 	i[1] = i[1].encode('utf8')
 	i[2] = i[2].encode('utf8')
-
-
 
 '''
 For the same first and third component, it selects only one element
@@ -256,7 +244,6 @@ Oskar-Schindler, helped, Jews
 
 It selects only one of them as it is assumed that they'd belong to the same sentence
 '''
-
 
 newer1 = []
 flag = [0 for i in range(len(common_relations_rc_1))]
@@ -278,8 +265,6 @@ for i in range(len(common_relations_rc_1)):
 common_relations_rc_1 = newer1[:]
 
 
-
-
 ###############################################################################
 '''
 EXCESS CODE. DONT REUSE.
@@ -299,9 +284,6 @@ for i in range(len(common_relations_rc_1)):
 #common_relations_rc_3 = common_relations_rc_2[:] instead of the next line		
 '''
 ###############################################################################
-
-
-
 
 '''
 Removes redudant elements for which 
@@ -384,8 +366,6 @@ for i in range(len(matrix)):
 			break
 		z += 1
 	count[i] += len(major)
-
-
 
 combo = dict(zip(list_matrix,count))
 list_of_elements_combo = sorted(combo.items(),key=operator.itemgetter(1),reverse=False) #ascending

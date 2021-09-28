@@ -1,39 +1,30 @@
 # -*- coding: utf-8 -*-
 # encoding=utf8
 
-
-
 '''
 This code does preprocessing on the input text to remove corner cases which
 cause trouble in the process of keyphrase extraction and then does the
 extraction process using RAKE extraction method.
 '''
 
-
-
 import re
 import operator
 import nltk
 
 
-
-
 #File containing text
-#content1 = open('sorter_part2.txt','r').read() # for winnowing
-content1 = open('input.txt','r').read() #for nowinnowing
-contentforsplit = content1[:]
-sorter = open('sorter_3.txt','w')
+#input_content = open('output_file_part2.txt','r').read() # for winnowing
+input_content = open('inputs/input.txt','r').read() #for nowinnowing
+contentforsplit = input_content[:]
+output_file = open('outputs/output_file.txt','w')
 
-stoplistlines = open("stopwords1.txt",'r').readlines()
+stoplistlines = open("inputs/stopwords.txt",'r').readlines()
 stoplist = []
 for i in stoplistlines:
 	stoplist.append(i.strip().lower())
 
-
-
-
 #refining data to appropriate form
-def preprocess(content1):
+def preprocess(input_content):
 
 	'''
 	Numbers like 1.34 are edge cases and the extractor will split the number
@@ -43,7 +34,7 @@ def preprocess(content1):
 	Similarly for desginations like Mr., Mrs., Dr., are replaced to Mr, Mrs, Dr
 	or initials like O. Schindler is replaced to O Schindler. 
 	'''
-	content = filter(None, re.sub('''Rs.''','''Rs''',content1))
+	content = filter(None, re.sub('''Rs.''','''Rs''',input_content))
 	content = filter(None, re.sub('''Mr.''','''Mr''',content))
 	content = filter(None, re.sub('''Mrs.''','''Mrs''',content))
 	content = filter(None, re.sub('''Ms.''','''Ms''',content))
@@ -100,9 +91,6 @@ def preprocess(content1):
 			phraseList.append(word_token[p])
 			p += 1
 
-
-	
-	
 	'''
 	phraseList contains merged proper nouns
 	'''	
@@ -118,20 +106,14 @@ def preprocess(content1):
 	print content_no_dot
 	phraseStr1 = phraseStr1.replace('<dot>', '.') #for Open IE
 	sent = nltk.sent_tokenize(content.decode('utf-8'))
-	content11 = phraseStr1[:]
-	sorter.write(content11.encode('utf8'))
+	input_content1 = phraseStr1[:]
+	output_file.write(input_content1.encode('utf8'))
 	content = phraseStr[:]
-
-
-
 	
 	#Removal of articles
 	articles = [' the ',' a ', ' an ']
 	for i in articles:
 		content = content.replace(i,' ')
-	
-	
-	
 	
 	#Removal of verbs which are not in stoplist
 	'''
@@ -159,8 +141,6 @@ def preprocess(content1):
 	return content
 
 
-
-
 #text split on the basis of following characters
 def contentSplit(content):
 	'''
@@ -180,8 +160,6 @@ def contentSplit(content):
 	return contentList
 
 
-
-	
 #Finding candidate keywords
 def processPhrases(contentList):
 	'''
@@ -200,8 +178,7 @@ def processPhrases(contentList):
 		phraseStr = (i.replace('\t','').replace('\n','').strip())
 
 		phraseList = phraseStr.split()
-		
-		
+			
 		for k in phraseList:	
 			if k.lower() in stoplist:
 				phraseList[phraseList.index(k)] = '|'
@@ -213,8 +190,6 @@ def processPhrases(contentList):
 	candidateKeywords = [x.strip() for x in candidateKeywords if x] 
 	candidateKeywords = filter(None, candidateKeywords)
 	return candidateKeywords
-
-
 
 
 #calculating word score
@@ -266,7 +241,7 @@ def word_score(candidateKeywords):
 
 	sort_list = sorted(summed.items(),key=operator.itemgetter(1),reverse=True)
 	
-	content = filter(None, re.sub('''Rs.''','''Rs''',content1))
+	content = filter(None, re.sub('''Rs.''','''Rs''',input_content))
 	content = filter(None, re.sub('''Mr.''','''Mr''',content))
 	content = filter(None, re.sub('''Mrs.''','''Mrs''',content))
 	content = filter(None, re.sub('''Ms.''','''Ms''',content))
@@ -287,8 +262,6 @@ def word_score(candidateKeywords):
 	new_sort_list = {}
 	for i,v in sort_list:
 		new_sort_list[i.replace('^',"'").replace('<dot>','.').strip()] = v
-	#	#print i.replace('^',"'").replace('<dot>','.').strip(), ' - ', v
-	##print '----------------------------------------------------------------'
 	
 	new_sort_list = sorted(new_sort_list.items(),key=operator.itemgetter(1),reverse=True)
 	
@@ -297,8 +270,6 @@ def word_score(candidateKeywords):
 		new_sort_dict[i] = v
 
 
-	
-	
 	#separating on the basis of paragraphs
 	splitcontent = contentforsplit.split('\n')
 	freq = [[] for i in range(len(splitcontent))]     #contains keyphrases in one para
@@ -326,53 +297,41 @@ def word_score(candidateKeywords):
 	return new_sort_list
 	'''
 
-
-
 	
 #dealing with characters which cause in poor results
 articles0 = ['“','”','"']
 for i in articles0:
-	content1 = content1.replace(i,'')
-content1 = content1.replace("'",'^')
-content1 = content1.replace("’",'^')		 	 
+	input_content = input_content.replace(i,'')
+input_content = input_content.replace("'",'^')
+input_content = input_content.replace("’",'^')		 	 
 articles = ['—','[',']']
 for o in articles:
-	content1 = content1.replace(o,' ')
+	input_content = input_content.replace(o,' ')
 
 articles1 = ['. The ', '. A ', '. An ']
 for o in articles1:
-	content1 = content1.replace(o,'. ')
-
-
-
+	input_content = input_content.replace(o,'. ')
 
 
 def main():
 	#Does preprocessing on the input text
-	content = preprocess(content1)
+	content = preprocess(input_content)
 
-
-	
 	#Splits processed input text on multiple symbols 
 	contentList = contentSplit(content)
-
-
 	
 	#Creates a list of keyphrases from the available text 
 	candidateKeywords = processPhrases(contentList)
 
-
-	
 	#calculates word scores of each keyphrase
 	global new_sort_list
 	new_sort_list = word_score(candidateKeywords)
-
 
 	#Print keyphrases in descending order
 	for i,v in new_sort_list:
 		i = i.strip()
 		print i, v
 
-	print '\n\n\n\n\n\n\n\n\n\n\n\n'
+	print '\n\n\n'
 
 main()	

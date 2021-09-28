@@ -2,8 +2,9 @@ import re
 def intersection(string1,string2):
 	#list1 = string1.split()
 	#list2 = string2.split()	
-	list1 = filter(None, re.split('''[-' ]''',string1))
-	list2 = filter(None, re.split('''[-' ]''',string2))
+	list1 = list(filter(None, re.split('''[-' ]''',string1)))
+	list2 = list(filter(None, re.split('''[-' ]''',string2)))
+	
 	count = 0
 	count1 = 0
 	count2 = 0
@@ -26,7 +27,7 @@ def intersection(string1,string2):
 			if list2[w] in list1[q]:
 				count2 += 1
 	count = max(count1,count2)
-	print count1, count2, count
+	print(count1, count2, count)
 	
 	
 intersection('Amazon executive Jeffrey-P-Bezos','Amazon chief executive Jeffrey-P-Bezos')

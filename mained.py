@@ -21,7 +21,7 @@ from sys import argv
 from sys import stderr
 import nltk
 
-stoplistlines = open("stopwords1.txt",'r').readlines()
+stoplistlines = open("inputs/stopwords.txt",'r').readlines()
 stoplist = []
 for i in stoplistlines:
 	stoplist.append(i.strip().lower())

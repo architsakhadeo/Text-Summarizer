@@ -2,10 +2,27 @@ The project uses Python wrappers on Stanford's Open IE from https://github.com/p
 
 Dependencies: You may be required to download some corpora and the built in pos tagger(maxent_treebank_pos_tagger) from nltk.download(). Download all if it doesn't work.
 
+_________________________________________________________________________________________
+Tools used
+_________________________________________________________________________________________
+
+> 1) Regular Expression
+> 
+> 2) NLTK data set (models, corpus)
+> 
+> 3) NLTK POS tagger
+> 
+> 4) Stanford’s OpenIE implementation in Python which also provides the facility to
+>    use graphviz to generate graph
+> 
+> 5) networkx to generate graph
+
+_________________________________________________________________________________________
 Running the code
+_________________________________________________________________________________________
 
   
-  > 1) Change the variable "content1" to input file name (input.txt) in the nltk_tagger_rake.py 
+  > 1) Change the variable "input_content" to input file name (input.txt) in the nltk_tagger_rake.py 
   >   
   > 2) python nltk_tagger_rake_part2.py -> gives keyphrases
   >
@@ -15,13 +32,15 @@ Running the code
   
 or Just run script.sh
 
-  > 1) Change the variable "content1" to input file name (input.txt) in the nltk_tagger_rake.py
+  > 1) Change the variable "input_content" to input file name (input.txt) in the nltk_tagger_rake.py
   >
   >2) bash script.sh
 
 _________________________________________________________________________________________
 Detailed description of the code
 _________________________________________________________________________________________
+
+The code executes in the following stages:
 
 1) RAKE (Rapid Automatic Keyword Extraction) was used to extract keywords.
 
@@ -109,7 +128,6 @@ ________________________________________________________________________________
 10) Graphs are displayed.
 
 
-
 _________________________________________________________________________________________
 
 Thus based on a purely statistical approach, we first obtained the top keyphrases,
@@ -121,18 +139,9 @@ Thus, from purely numerical, limited, and not totally reliable statistics we con
 towards a more reliable and logical approach to find important words in the  text.
 This was further used to find sentences which consisted of these important words to
 form the summary.
-
-_________________________________________________________________________________________
-Tools used
 _________________________________________________________________________________________
 
-> 1) Regular Expression
-> 
-> 2) NLTK data set (models, corpus)
-> 
-> 3) NLTK POS tagger
-> 
-> 4) Stanford’s OpenIE implementation in Python which also provides the facility to
->    use graphviz to generate graph
-> 
-> 5) networkx to generate graph
+
+Procedure explained as a figure:
+
+<img src="https://github.com/architsakhadeo/Text-Summarizer/blob/master/procedure.png?raw=true" width="500">

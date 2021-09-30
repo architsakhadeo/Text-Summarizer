@@ -65,9 +65,9 @@ The code executes in the following stages:
    (Name and Name-Surname if present both are considered as Name-Surname)
    to avoid redundancy and avoid sharing of importance.
 
-****** After this all sorts of post processing is done on the output of OpenIE output
+`After this, all sorts of post processing is done on the output of OpenIE output
 to remove redundancy and get only the required output. These steps are necessary as
-OpenIE gives very redundant subject – action – verb combinations. ******
+OpenIE gives very redundant subject – action – verb combinations.`
 
 9) We then form adjacency matrix of all the nodes(subject and object in the processed
    OpenIE output), to get connectivity of each node. It is a directed graph.

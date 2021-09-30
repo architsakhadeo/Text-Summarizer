@@ -2,43 +2,39 @@ The project uses Python wrappers on Stanford's Open IE from https://github.com/p
 
 Dependencies: You may be required to download some corpora and the built in pos tagger(maxent_treebank_pos_tagger) from nltk.download(). Download all if it doesn't work.
 
-_________________________________________________________________________________________
-Tools used
-_________________________________________________________________________________________
+## Tools used
 
-> 1) Regular Expression
-> 
-> 2) NLTK data set (models, corpus)
-> 
-> 3) NLTK POS tagger
-> 
-> 4) Stanford’s OpenIE implementation in Python which also provides the facility to
->    use graphviz to generate graph
-> 
-> 5) networkx to generate graph
+1) Regular Expression
+ 
+2) NLTK data set (models, corpus)
+ 
+3) NLTK POS tagger
+ 
+4) Stanford’s OpenIE implementation in Python which also provides the facility to
+   use graphviz to generate graph
+ 
+5) networkx to generate graph
 
-_________________________________________________________________________________________
-Running the code
-_________________________________________________________________________________________
+
+## Running the code
 
   
-  > 1) Change the variable "input_content" to input file name (input.txt) in the stage1_nowinnowing.py 
-  >   
-  > 2) python stage1_nowinnowing.py -> gives keyphrases
-  >
-  > 3) python proc_ranker.py -f outputs/output_file.txt -> gives relation between objects and subject(common to keyphrases)
-  >
-  > 4) Check for the out.png image for graphical representation provided by Open IE
+ 1) Change the variable "input_content" to input file name (input.txt) in the stage1_nowinnowing.py 
+   
+ 2) `python stage1_nowinnowing.py` -> gives keyphrases
+ 
+ 3) `python proc_ranker.py -f outputs/output_file.txt` -> gives relation between objects and subject(common to keyphrases)
+ 
+ 4) Check for the out.png image for graphical representation provided by Open IE
   
 or Just run script.sh
 
-  > 1) Change the variable "input_content" to input file name (input.txt) in the stage1_nowinnowing.py
-  >
-  >2) bash script.sh
+ 1) Change the variable "input_content" to input file name (input.txt) in the stage1_nowinnowing.py
+  
+ 2) `bash script.sh`
 
-_________________________________________________________________________________________
-Detailed description of the code
-_________________________________________________________________________________________
+
+## Detailed description of the code
 
 The code executes in the following stages:
 
@@ -97,10 +93,7 @@ OpenIE gives very redundant subject – action – verb combinations. ******
 16) Two types of graphs are plotted. One using graphviz and other networkx.
 
 
-
-_________________________________________________________________________________________
-Thus in short,
-_________________________________________________________________________________________
+## Thus in short,
 
 1) Preprocessing is done on input text to get required form of text to be passed
    as an input to the keyword extractor.
@@ -128,7 +121,7 @@ ________________________________________________________________________________
 10) Graphs are displayed.
 
 
-_________________________________________________________________________________________
+## Summary
 
 Thus based on a purely statistical approach, we first obtained the top keyphrases,
 and then using a logical approach of getting an intersection between RAKE and OpenIE
@@ -139,7 +132,6 @@ Thus, from purely numerical, limited, and not totally reliable statistics we con
 towards a more reliable and logical approach to find important words in the  text.
 This was further used to find sentences which consisted of these important words to
 form the summary.
-_________________________________________________________________________________________
 
 
 Procedure explained as a figure:

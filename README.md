@@ -19,17 +19,17 @@ Dependencies: You may be required to download some corpora and the built-in pos-
 ## Running the code
 
   
- 1) Change the variable "input_content" to input file name (input.txt) in the stage1_nowinnowing.py 
+ 1) Change the variable `input_content` to input file name (input.txt) in the `stage1_nowinnowing.py`
    
  2) `python stage1_nowinnowing.py` -> gives keyphrases
  
  3) `python proc_ranker.py -f outputs/output_file.txt` -> gives relation between objects and subject(common to keyphrases)
  
- 4) Check for the out.png image for graphical representation provided by Open IE
+ 4) Check for the `out.png` image for graphical representation provided by Open IE
   
-or Just run script.sh
+or Just run `script.sh`
 
- 1) Change the variable "input_content" to input file name (input.txt) in the stage1_nowinnowing.py
+ 1) Change the variable `input_content` to input file name (input.txt) in the `stage1_nowinnowing.py`
   
  2) `bash script.sh`
 
